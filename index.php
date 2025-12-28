@@ -18,7 +18,7 @@
 <body>
     <div class="container">
         <div class="text-center mb-5">
-            <h1 class="fw-bold text-dark"><i class="fa-solid fa-book-open me-2"></i>Kindle 阅读统计中心</h1>
+            <h1 class="fw-bold text-dark bigTitle"><i class="fa-solid fa-book-open me-2"></i>Kindle 阅读统计中心</h1>
             <p class="text-muted">记录你的每一次阅读，见证知识的积累</p>
         </div>
 
@@ -50,7 +50,7 @@
                         <h3 class="card-title">上传统计文件</h3>
                         <p class="card-text text-secondary mt-3">
                             已有数据文件？<br>
-                            上传 JSON/TXT 文件生成详细报告
+                            上传插件的 log 文件夹生成详细报告
                         </p>
                         <a href="upload.php" class="btn btn-primary mt-3 w-100">
                             <i class="fa-solid fa-upload me-1"></i> 上传文件

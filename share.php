@@ -93,7 +93,7 @@ $comment_month = "本月目标 {$data['goal']} 分钟/天，已达标 {$stats['g
     <div id="capture-area">
         <div class="d-flex justify-content-between align-items-end mb-4 px-2">
             <div>
-                <h3 class="fw-bold mb-0 text-dark">阅读统计分析报告</h3>
+                <h3 class="fw-bold mb-0 text-dark bigTitle">阅读统计分析报告</h3>
                 <span class="badge bg-primary-subtle text-primary mt-2 px-3 py-2 rounded-pill">
                     <i class="fa-regular fa-calendar-check me-1"></i> <?php echo $data['year']; ?>年<?php echo $data['month']; ?>月
                 </span>
@@ -351,6 +351,7 @@ $comment_month = "本月目标 {$data['goal']} 分钟/天，已达标 {$stats['g
         } catch (e) {
             console.log('生成失败');
         }
+        fab.style.visibility = 'visible';
     }
 
     function quickExport(id, name) {

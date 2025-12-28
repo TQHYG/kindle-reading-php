@@ -1,4 +1,8 @@
 #export-container { max-width: 900px; margin: 0 auto; transition: width 0.3s ease; }
+
+.bigTitle {
+    margin-top: 40px !important;
+}
         
 .stat-card { 
     background: #fff; 
