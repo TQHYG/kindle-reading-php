@@ -12,10 +12,57 @@ $js_today_labels = json_encode(["0-2点", "2-4点", "4-6点", "6-8点", "8-10点
 
 $daily_values = array_values($data['daily_data']);
 $daily_keys = array_keys($data['daily_data']);
-$week_data = array_slice($daily_values, -7); 
-$week_labels = array_map(function($d){ return $d."日"; }, array_slice($daily_keys, -7));
+
+// 周视图数据计算 - 处理跨月和月初情况
+$days_in_month = date('t', mktime(0, 0, 0, $data['month'], 1, $data['year']));
+$current_year = date('Y');
+$current_month = date('m');
+
+// 确定结束日期
+if ($data['year'] == $current_year && $data['month'] == $current_month) {
+    // 当前月份，使用今天或最后一天（取较小值）
+    $today_day = date('d');
+    $end_day = min($today_day, $days_in_month);
+} else {
+    // 历史月份，使用最后一天
+    $end_day = $days_in_month;
+}
+
+// 计算起始日期
+$start_day = $end_day - 6;
+
+$week_data = [];
+$week_labels = [];
+
+// 处理跨月情况
+for ($i = 0; $i < 7; $i++) {
+    $current_day = $start_day + $i;
+    
+    if ($current_day <= 0) {
+        // 上个月的日子，显示为0
+        $week_data[] = 0;
+        $prev_month_days = date('t', mktime(0, 0, 0, $data['month'] - 1, 1, $data['year']));
+        $day_in_prev_month = $prev_month_days + $current_day;
+        $week_labels[] = $day_in_prev_month . "日*";
+    } elseif ($current_day > $days_in_month) {
+        // 下个月的日子（通常不会出现，除非结束日期是最后一天）
+        $week_data[] = 0;
+        $week_labels[] = ($current_day - $days_in_month) . "日*";
+    } else {
+        // 当前月的日子
+        $week_data[] = $data['daily_data'][$current_day] ?? 0;
+        $week_labels[] = $current_day . "日";
+    }
+}
+
 $js_week_data = json_encode($week_data);
 $js_week_labels = json_encode($week_labels);
+
+// 周视图点评 - 只使用当前月实际有数据的日子
+$week_assoc = [];
+for ($day = max(1, $start_day); $day <= min($end_day, $days_in_month); $day++) {
+    $week_assoc[$day] = $data['daily_data'][$day] ?? 0;
+}
 
 $comment_today = generate_comment('today', $data['today_dist'], ["0-2点", "2-4点", "4-6点", "6-8点", "8-10点", "10-12点", "12-14点", "14-16点", "16-18点", "18-20点", "20-22点", "22-24点"]);
 $week_assoc = array_combine(array_slice($daily_keys, -7), $week_data);
@@ -149,7 +196,7 @@ $comment_month = "本月目标 {$data['goal']} 分钟/天，已达标 {$stats['g
 
 <div class="fab-container">
     <button class="btn btn-primary btn-fab shadow" onclick="exportFullReport()">
-        <i class="fa-solid fa-download me-2"></i> 保存完整长图报告
+        <i class="fa-solid fa-download me-2"></i> 保存完整报告
     </button>
 </div>
 
