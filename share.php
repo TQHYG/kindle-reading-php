@@ -79,7 +79,6 @@ $comment_month = "本月目标 {$data['goal']} 分钟/天，已达标 {$stats['g
     <link href="style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://www.tqhyg.net/wp-content/themes/Sakurairo/css/font-awesome-animation.min.css" rel="stylesheet">
 
     <style>
         :root { --primary-color: #0d6efd; --bg-color: #f4f7f9; }
