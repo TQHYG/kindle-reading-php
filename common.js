@@ -196,7 +196,7 @@ function autoExport(filename) {
 
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/png');
-            link.download = '${filename}.png';
+            link.download = `${filename}.png`;
             link.click();
                     
             // 移除提示
