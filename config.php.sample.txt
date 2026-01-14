@@ -1,0 +1,24 @@
+<?php
+// config.php
+return [
+    'db' => [
+        'host'     => '127.0.0.1',
+        'dbname'   => 'kykky_db',
+        'user'     => 'root',
+        'password' => 'your_password',
+        'charset'  => 'utf8mb4',
+    ],
+    'oauth' => [
+        'url_authorize'    => 'https://github.com/login/oauth/authorize',
+        'url_access_token' => 'https://github.com/login/oauth/access_token',
+        'url_user_info'    => 'https://api.github.com/user',
+        
+        'client_id'     => 'GITHUB_ID',
+        'client_secret' => 'GITHUB_SECRET',
+        'redirect_uri'  => 'https://yourdomain.com/callback.php',
+    ],
+    'security' => [
+        'token_secret'  => 'SUPER_SECRET_KEY_FOR_SIGNING', // 用于生成 Access Token
+    ],
+    'admin_ids' => [1], // 管理员用户ID列表
+];
