@@ -54,3 +54,35 @@ function format_duration($seconds) {
     if ($m > 0 || $h == 0) $res .= $m . ' <span class="stat-unit">分</span>';
     return $res;
 }
+
+/**
+ * 更新用户阅读统计数据
+ * @param int $user_id 用户ID
+ * @param int $today_sec 今日阅读秒数
+ * @param int $month_sec 本月阅读秒数
+ */
+
+function update_user_stats($user_id, $today_sec, $month_sec) {
+    // 基础校验
+    if ($today_sec < 0 || $month_sec < 0) {
+        return false;
+    }
+    if ($today_sec > 200000 || $month_sec > 8000000) {
+        return false;
+    }
+
+    $sql = "INSERT INTO stats (user_id, today_seconds, month_seconds, last_update)
+    VALUES (?, ?, ?, NOW())
+    ON DUPLICATE KEY UPDATE
+    today_seconds = VALUES(today_seconds),
+    month_seconds = VALUES(month_seconds),
+    last_update = NOW()";
+
+    // db_query 可能返回 true / false / "0" / "1" / "0 rows affected"
+    // 只要不是 false，就视为成功
+    $ret = db_query($sql, [$user_id, $today_sec, $month_sec]);
+
+    return $ret !== false;
+}
+
+

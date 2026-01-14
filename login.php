@@ -72,13 +72,47 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
 $user = get_current_user_info();
 if ($user) {
     // 已登录状态，显示倒计时跳转
-    include __DIR__ . '/func/header.php';
     $goto = $_SESSION['redirect_after_login'] ?? '/user.php';
-    echo "<div style='text-align:center; margin-top:50px;'>";
-    echo "<h3>您已登录为 " . htmlspecialchars($user['nickname']) . "</h3>";
-    echo "<p id='timer'>3</p> 秒后自动为您跳转...";
-    echo "<script>let s=3; setInterval(()=>{ if(--s<=0)location.href='$goto'; document.getElementById('timer').innerText=s; }, 1000);</script>";
-    echo "</div>";
+    ?>
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <title>登录成功 - Kykky</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <?php include __DIR__ . '/func/header.php'; ?>
+        <div class="container">
+            <div class="card login-box" style="margin-top: 100px;">
+                <div style="font-size: 48px; color: var(--success); margin-bottom: 20px;">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3>欢迎回来，<?= htmlspecialchars($user['nickname']) ?></h3>
+                <p style="color: var(--text-muted);">
+                    登录成功！我们将于 <span id="timer" style="font-weight: bold; color: var(--primary);">3</span> 秒后为您跳转。
+                </p>
+                <div style="margin-top: 20px;">
+                    <a href="<?= $goto ?>" class="btn btn-outline">立即跳转</a>
+                </div>
+            </div>
+        </div>
+        <script>
+            let s = 3;
+            const timerEl = document.getElementById('timer');
+            const interval = setInterval(() => {
+                s--;
+                if (s <= 0) {
+                    clearInterval(interval);
+                    location.href = '<?= $goto ?>';
+                }
+                if (timerEl) timerEl.innerText = s;
+            }, 1000);
+        </script>
+    </body>
+    </html>
+    <?php
     exit;
 }
 
@@ -95,16 +129,34 @@ $github_url = $config['oauth']['url_authorize'] . "?" . http_build_query([
 ]);
 ?>
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>登录 Kykky</title></head>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - Kykky 阅读数据统计</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
 <body>
     <?php include __DIR__ . '/func/header.php'; ?>
-    <div style="max-width:400px; margin: 100px auto; text-align:center; border:1px solid #ddd; padding:40px; border-radius:10px;">
-        <h2>账号登录</h2>
-        <p style="color:#666;">加入 Kykky，同步您的 Kindle 阅读数据</p>
-        <a href="<?= $github_url ?>" style="display:inline-block; background:#24292e; color:white; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold; margin-top:20px;">
-            使用 GitHub 账号登录
-        </a>
+    
+    <div class="container">
+        <div class="card login-box">
+            <div style="font-size: 40px; margin-bottom: 20px; color: var(--text);">
+                <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <h2 style="margin-bottom: 10px;">账号登录</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">
+                同步您的 Kindle 阅读数据，参与全球排名
+            </p>
+            
+            <a href="<?= $github_url ?>" class="btn btn-github" style="box-sizing: border-box; display: flex;">
+                <i class="fa-brands fa-github"></i> 使用 GitHub 账号登录
+            </a>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted);">
+                登录即代表您同意我们的隐私政策与数据同步协议
+            </div>
+        </div>
     </div>
 </body>
 </html>
