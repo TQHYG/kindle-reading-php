@@ -1,29 +1,45 @@
 <?php
 // func/cron.php
-// 建议在 crontab 中这样设置：*/10 * * * * php /path/to/your/func/cron.php
+// 设置时区为北京时间
+date_default_timezone_set('Asia/Shanghai');
 
-// 确保只能从命令行执行，防止外部通过 URL 触发清理
+// 确保只能从命令行执行
 if (php_sapi_name() !== 'cli' && !defined('CRON_ALLOWED')) {
     die("This script can only be run from the command line.");
 }
 
 require_once __DIR__ . '/db.php';
 
-echo "[" . date('Y-m-d H:i:s') . "] Starting cleanup...\n";
+$now = time();
+$currentH = date('H', $now);
+$currentM = date('i', $now);
+$currentD = date('d', $now);
+
+echo "[" . date('Y-m-d H:i:s') . "] Starting Cron Tasks...\n";
 
 /**
  * 任务 1：清理过期的 Pending 设备码
- * 逻辑：status = 0 (未绑定) 且超过 10 分钟未处理
  */
-$deleted_pending = db_query(
+db_query(
     "DELETE FROM devices WHERE status = 0 AND created_at < DATE_SUB(NOW(), INTERVAL 10 MINUTE)",
-                            []
+    []
 );
+echo "- Expired pending devices removed.\n";
 
 /**
- * 任务 2：(可选) 清理极其陈旧的未登录 Session 或 临时文件
- * 你可以在这里扩展其他的清理逻辑
+ * 任务 2：重置今日阅读时间 (每天 00:00 - 00:10 触发)
  */
+if ($currentH == '00' && $currentM < 10) {
+    db_query("UPDATE stats SET today_seconds = 0", []);
+    echo "- Today seconds reset to zero.\n";
+    
+    /**
+     * 任务 3：重置每月阅读时间 (每月 1 号 00:00 - 00:10 触发)
+     */
+    if ($currentD == '01') {
+        db_query("UPDATE stats SET month_seconds = 0", []);
+        echo "- Monthly seconds reset to zero.\n";
+    }
+}
 
-echo "Cleanup finished.\n";
-echo "- Expired pending devices removed.\n";
+echo "All tasks finished.\n";
