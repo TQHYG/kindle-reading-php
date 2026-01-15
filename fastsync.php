@@ -25,7 +25,7 @@ if ($raw_b64) {
 
         // 3. 安全校验：检查该设备是否属于当前登录用户
         $device_code = $decoded['did'];
-        $check = db_query("SELECT id FROM devices WHERE code = ? AND user_id = ?", [$device_code, $uid]);
+        $check = db_query("SELECT code FROM devices WHERE code = ? AND user_id = ?", [$device_code, $uid]);
         
         if (empty($check)) {
             throw new Exception("安全校验失败：该设备不属于您的账号，无法同步。");
