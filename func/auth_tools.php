@@ -15,7 +15,7 @@ function generate_token($user_id, $device_id) {
     return $data . '.' . $sign;
 }
 
-// 修改校验函数
+// 校验函数
 function validate_token($token) {
     $config = require __DIR__ . '/../config.php';
     $parts = explode('.', $token);
@@ -28,6 +28,18 @@ function validate_token($token) {
     if ($payload['exp'] < time()) return null;
 
     // 返回包含 uid 和 did 的数组
+    return $payload;
+}
+
+function require_auth() {
+    $token = $_SERVER['HTTP_AUTHORIZATION'] ?? $_POST['token'] ?? $_GET['token'] ?? '';
+    // 处理 Bearer 格式
+    if (strpos($token, 'Bearer ') === 0) $token = substr($token, 7);
+
+    $payload = validate_token($token);
+    if (!$payload) {
+        api_response(['status' => 'error', 'msg' => 'Unauthorized or invalid token'], 401);
+    }
     return $payload;
 }
 
