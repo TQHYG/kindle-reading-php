@@ -270,3 +270,9 @@ ol {
     .hero h1 { font-size: 1.8rem; }
     .stats-grid { grid-template-columns: 1fr; }
 }
+
+.sync-card { max-width: 400px; margin: 50px auto; padding: 30px; }
+.data-preview { background: #f6f8fa; border-radius: 8px; padding: 20px; margin: 20px 0; }
+.data-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.data-label { color: var(--text-muted); }
+.data-value { font-weight: 700; color: var(--primary); }
