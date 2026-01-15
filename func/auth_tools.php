@@ -22,12 +22,23 @@ function validate_token($token) {
     if (count($parts) !== 2) return null;
 
     list($data, $sign) = $parts;
+    
+    // 1. 签名校验：确保 Token 是由本服务器签发的，且未被篡改
     if (hash_hmac('sha256', $data, $config['app_secret']) !== $sign) return null;
 
     $payload = json_decode(base64_decode($data), true);
-    if ($payload['exp'] < time()) return null;
+    
+    // 2. 时效性检查：确保 Token 未过期
+    if (!isset($payload['exp']) || $payload['exp'] < time()) return null;
 
-    // 返回包含 uid 和 did 的数组
+    // 3. 归属性与存在性双重检查 
+    $sql = "SELECT COUNT(*) as cnt FROM devices WHERE code = ? AND user_id = ? AND status = 1";
+    $res = db_query($sql, [$payload['did'], $payload['uid']]);
+    
+    if (!$res || $res[0]['cnt'] == 0) {
+        return null; 
+    }
+
     return $payload;
 }
 
