@@ -35,7 +35,6 @@ header nav { display: flex; align-items: center; gap: 15px; }
 header nav a { color: #c9d1d9; text-decoration: none; font-size: 14px; }
 header nav a:hover { color: white; }
 
-/* 专门修复顶栏头像尺寸 */
 header nav span .user-avatar {
     width: 24px !important;
     height: 24px !important;
@@ -215,7 +214,6 @@ header nav span .user-avatar {
 
 /* --- 辅助样式 --- */
 
-/* 首页特有的 Hero 区域样式 */
 .hero {
     padding: 60px 0;
     text-align: center;
@@ -235,7 +233,6 @@ header nav span .user-avatar {
 .feature-item i { font-size: 24px; color: var(--primary); margin-bottom: 10px; display: block; }
 .main-actions { display: flex; gap: 15px; justify-content: center; }
 
-/* 让卡片内的标题图标稍微大一点并对齐 */
 .feature-item i.fa-solid {
     font-size: 1.5rem;
     color: var(--primary);

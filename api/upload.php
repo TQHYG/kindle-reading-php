@@ -16,7 +16,7 @@ $user_dir = __DIR__ . "/../storage/{$uid}";
 if (!is_dir($user_dir)) mkdir($user_dir, 0755, true);
 
 // ==========================================
-// 逻辑 A: 处理文件上传 (带原子性保证)
+// 逻辑 A: 处理文件上传
 // ==========================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['logs'])) {
     $files = $_FILES['logs'];
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['logs'])) {
 }
 
 // ==========================================
-// 逻辑 B: 数据统计同步 (调用 common.php 中的函数)
+// 逻辑 B: 数据统计同步
 // ==========================================
 $db_updated = false;
 if ($today_sec !== null && $month_sec !== null) {

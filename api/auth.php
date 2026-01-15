@@ -83,6 +83,20 @@ try {
         }
     }
 
+    // ==========================================
+    // 3. 设备登出 (吊销)
+    // ==========================================
+    if ($action === 'logout') {
+        // 校验 Token 有效性并获取 payload
+        $auth = require_auth(); 
+        $device_code = $auth['did']; 
+
+        // 从数据库中删除该设备记录，实现吊销
+        db_query("DELETE FROM devices WHERE code = ?", [$device_code]);
+
+        api_response(['status' => 'success', 'msg' => 'Device logged out and token revoked']);
+    }
+
     // 未知动作
     api_response(['status' => 'error', 'msg' => 'invalid_action'], 400);
 
