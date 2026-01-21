@@ -120,45 +120,47 @@ $my_devices = db_query("SELECT * FROM devices WHERE user_id = ? AND status = 1 O
 
     <h3 style="margin: 30px 0 15px;"><i class="fa-solid fa-tablet-screen-button"></i> 已关联设备</h3>
     <div class="card" style="padding: 0; overflow: hidden;">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>设备识别码</th>
-                    <th>设备名称</th>
-                    <th>有效期至</th>
-                    <th style="text-align:right;">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($my_devices)): ?>
-                    <tr><td colspan="4" style="text-align:center; padding:60px; color:var(--text-muted);">暂无绑定设备</td></tr>
-                <?php else: ?>
-                    <?php foreach ($my_devices as $dev): 
-                        $expiry_date = date('Y-m-d', strtotime($dev['created_at'] . ' +365 days'));
-                    ?>
-                        <tr>
-                            <td><span class="code-badge"><?= htmlspecialchars($dev['code']) ?></span></td>
-                            <td><strong><?= htmlspecialchars($dev['device_name']) ?></strong></td>
-                            <td><?= $expiry_date ?></td>
-                            <td style="text-align:right;">
-                                <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                    <button class="btn btn-outline" onclick="renameDevice('<?= $dev['code'] ?>', '<?= addslashes($dev['device_name']) ?>')">
-                                        <i class="fa-solid fa-pen-to-square"></i> 重命名
-                                    </button>
-                                    <form method="POST" onsubmit="return confirm('确定要删除此设备吗？')">
-                                        <input type="hidden" name="action" value="delete_device">
-                                        <input type="hidden" name="device_code" value="<?= $dev['code'] ?>">
-                                        <button type="submit" class="btn btn-outline">
-                                            <i class="fa-solid fa-trash-can"></i> 删除
+        <div class="table-responsive">
+            <table class="table" style="margin-bottom: 0;">
+                <thead>
+                    <tr>
+                        <th>设备识别码</th>
+                        <th>设备名称</th>
+                        <th>有效期至</th>
+                        <th style="text-align:right;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($my_devices)): ?>
+                        <tr><td colspan="4" style="text-align:center; padding:60px; color:var(--text-muted);">暂无绑定设备</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($my_devices as $dev): 
+                            $expiry_date = date('Y-m-d', strtotime($dev['created_at'] . ' +365 days'));
+                        ?>
+                            <tr>
+                                <td><span class="code-badge"><?= htmlspecialchars($dev['code']) ?></span></td>
+                                <td><strong><?= htmlspecialchars($dev['device_name']) ?></strong></td>
+                                <td><?= $expiry_date ?></td>
+                                <td style="text-align:right;">
+                                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                                        <button class="btn btn-outline" onclick="renameDevice('<?= $dev['code'] ?>', '<?= addslashes($dev['device_name']) ?>')">
+                                            <i class="fa-solid fa-pen-to-square"></i> 重命名
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                                        <form method="POST" onsubmit="return confirm('确定要删除此设备吗？')">
+                                            <input type="hidden" name="action" value="delete_device">
+                                            <input type="hidden" name="device_code" value="<?= $dev['code'] ?>">
+                                            <button type="submit" class="btn btn-outline">
+                                                <i class="fa-solid fa-trash-can"></i> 删除
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

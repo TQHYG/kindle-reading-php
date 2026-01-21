@@ -149,7 +149,7 @@ $github_url = $config['oauth']['url_authorize'] . "?" . http_build_query([
                 同步您的 Kindle 阅读数据，参与全球排名
             </p>
             
-            <a href="<?= $github_url ?>" class="btn btn-github" style="box-sizing: border-box; display: flex;">
+            <a href="<?= $github_url ?>" class="btn btn-github" style="box-sizing: border-box; display: flex; padding: 1em;">
                 <i class="fa-brands fa-github"></i> 使用 GitHub 账号登录
             </a>
             

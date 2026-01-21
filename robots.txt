@@ -1,0 +1,19 @@
+User-agent: *
+
+# 允许索引主页和排行榜基础页面
+Allow: /$
+Allow: /rank.php$
+
+# 禁止索引所有包含查询参数的 URL (例如 ?type=today, ?page=2 等)
+# 这样可以防止搜索引擎抓取重复的排行榜内容或登录状态页
+Disallow: /*?
+
+# 禁止索引功能性 PHP 文件和目录
+Disallow: /login.php
+Disallow: /upload.php
+Disallow: /user.php
+Disallow: /device.php
+Disallow: /fastsync.php
+Disallow: /func/
+Disallow: /storage/
+Disallow: /config.php

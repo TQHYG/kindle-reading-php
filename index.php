@@ -22,9 +22,9 @@ $user = get_current_user_info();
         
         <div class="main-actions">
             <?php if (!$user): ?>
-                <a href="/login.php" class="btn btn-primary" style="padding: 12px 30px; font-size: 16px;">使用 GitHub 登录</a>
+                <a href="/login.php" class="btn btn-primary">使用 GitHub 登录</a>
             <?php else: ?>
-                <a href="/user.php" class="btn btn-primary" style="padding: 12px 30px; font-size: 16px;">进入个人中心</a>
+                <a href="/user.php" class="btn btn-primary">进入个人中心</a>
                 <a href="/rank.php" class="btn btn-outline" style="padding: 12px 30px; font-size: 16px; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">查看排行榜</a>
             <?php endif; ?>
         </div>
