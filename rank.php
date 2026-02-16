@@ -38,14 +38,16 @@ if (isset($_GET['api'])) {
     }
 
     // 2. 获取列表数据
+    $limit = (int)$limit;
+    $offset = (int)$offset;
     $sql = "SELECT s.user_id, s.{$sort_field} as seconds, u.nickname, u.avatar 
             FROM stats s
             LEFT JOIN users u ON s.user_id = u.id
             WHERE s.{$sort_field} > 0
             ORDER BY s.{$sort_field} DESC 
-            LIMIT ? OFFSET ?";
-    
-    $response['list'] = db_query($sql, [$limit, $offset]);
+            LIMIT $limit OFFSET $offset";
+
+    $response['list'] = db_query($sql);
 
     header('Content-Type: application/json');
     echo json_encode($response);
