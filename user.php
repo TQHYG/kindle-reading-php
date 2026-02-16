@@ -28,47 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('/user.php');
 }
 
-// 处理数据下载
-if (isset($_GET['action']) && $_GET['action'] === 'download_backup') {
-    $uid = $user['id'];
-    $user_storage = __DIR__ . "/storage/{$uid}";
-
-    if (!is_dir($user_storage)) {
-        die("暂无备份数据。");
-    }
-
-    $zip_name = "kindle_backup_user_{$uid}_" . date('Ymd') . ".zip";
-    $zip_file = tempnam(sys_get_temp_dir(), 'zip'); // 创建临时文件
-
-    $zip = new ZipArchive();
-    if ($zip->open($zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-        $files = glob($user_storage . "/*");
-        $has_files = false;
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                // 仅添加文件，不带绝对路径层级
-                $zip->addFile($file, basename($file));
-                $has_files = true;
-            }
-        }
-        $zip->close();
-
-        if (!$has_files) {
-            die("文件夹内没有可备份的文件。");
-        }
-
-        // 发送 Headers 触发浏览器下载
-        header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename="' . $zip_name . '"');
-        header('Content-Length: ' . filesize($zip_file));
-        readfile($zip_file);
-        unlink($zip_file); // 下载完删除临时 zip
-        exit;
-    } else {
-        die("备份生成失败，请联系管理员。");
-    }
-}
-
 // 获取统计数据
 $stats_row = db_query("SELECT * FROM stats WHERE user_id = ?", [$user['id']]);
 $stats = $stats_row[0] ?? ['today_seconds' => 0, 'month_seconds' => 0];
@@ -80,7 +39,9 @@ $my_devices = db_query("SELECT * FROM devices WHERE user_id = ? AND status = 1 O
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户中心 - Kykky 阅读数据统计</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
 </head>
@@ -88,69 +49,79 @@ $my_devices = db_query("SELECT * FROM devices WHERE user_id = ? AND status = 1 O
 
 <?php include __DIR__ . '/func/header.php'; ?>
 
-<div class="container">
-    <div class="card">
-        <div class="user-profile">
-            <img src="<?= htmlspecialchars($user['avatar']) ?>" class="profile-avatar">
-            <div class="profile-info">
-                <h2 style="margin:0; font-size:1.5rem;"><?= htmlspecialchars($user['nickname']) ?></h2>
-                <p style="margin:5px 0 0; color:var(--text-muted);"><i class="fa-regular fa-id-card"></i> 阅读数据概览</p>
+<div class="container py-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center gap-3">
+            <img src="<?= htmlspecialchars($user['avatar']) ?>" class="rounded-circle border" width="80" height="80">
+            <div>
+                <h4 class="mb-0"><?= htmlspecialchars($user['nickname']) ?></h4>
+                <p class="mb-0 text-secondary"><i class="fa-regular fa-id-card me-1"></i> 阅读数据概览</p>
             </div>
         </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-label">今日阅读</span>
-            <div class="stat-value"><?= format_duration($stats['today_seconds']) ?></div>
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <div class="text-secondary text-uppercase small fw-semibold mb-1">今日阅读</div>
+                    <div class="stat-value"><?= format_duration($stats['today_seconds']) ?></div>
+                </div>
+            </div>
         </div>
-        <div class="stat-card">
-            <span class="stat-label">本月累计</span>
-            <div class="stat-value"><?= format_duration($stats['month_seconds']) ?></div>
+        <div class="col-sm-6">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <div class="text-secondary text-uppercase small fw-semibold mb-1">本月累计</div>
+                    <div class="stat-value"><?= format_duration($stats['month_seconds']) ?></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <h3><i class="fa-solid fa-box-archive"></i> 数据备份</h3>
-        <p class="text-muted" style="font-size: 14px;">您可以下载备份在服务器上的原始日志文件（history.gz 及 metrics 日志）。</p>
-        <a href="user.php?action=download_backup" class="btn btn-primary">
-            <i class="fa-solid fa-download"></i> 打包下载备份 (.zip)
-        </a>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="fa-solid fa-box-archive me-1"></i> 数据备份</h5>
+            <p class="text-secondary small">您可以下载备份在服务器上的原始日志文件（history.gz 及 metrics 日志）。</p>
+            <a href="/api/files.php?action=download_backup" class="btn btn-primary">
+                <i class="fa-solid fa-download me-1"></i> 打包下载备份 (.zip)
+            </a>
+        </div>
     </div>
 
-    <h3 style="margin: 30px 0 15px;"><i class="fa-solid fa-tablet-screen-button"></i> 已关联设备</h3>
-    <div class="card" style="padding: 0; overflow: hidden;">
+    <h5 class="mb-3"><i class="fa-solid fa-tablet-screen-button me-1"></i> 已关联设备</h5>
+    <div class="card shadow-sm">
         <div class="table-responsive">
-            <table class="table" style="margin-bottom: 0;">
-                <thead>
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
                     <tr>
                         <th>设备识别码</th>
                         <th>设备名称</th>
                         <th>有效期至</th>
-                        <th style="text-align:right;">操作</th>
+                        <th class="text-end">操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($my_devices)): ?>
-                        <tr><td colspan="4" style="text-align:center; padding:60px; color:var(--text-muted);">暂无绑定设备</td></tr>
+                        <tr><td colspan="4" class="text-center text-secondary py-5">暂无绑定设备</td></tr>
                     <?php else: ?>
                         <?php foreach ($my_devices as $dev): 
                             $expiry_date = date('Y-m-d', strtotime($dev['created_at'] . ' +365 days'));
                         ?>
                             <tr>
-                                <td><span class="code-badge"><?= htmlspecialchars($dev['code']) ?></span></td>
+                                <td><code class="bg-light px-2 py-1 rounded"><?= htmlspecialchars($dev['code']) ?></code></td>
                                 <td><strong><?= htmlspecialchars($dev['device_name']) ?></strong></td>
                                 <td><?= $expiry_date ?></td>
-                                <td style="text-align:right;">
-                                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                        <button class="btn btn-outline" onclick="renameDevice('<?= $dev['code'] ?>', '<?= addslashes($dev['device_name']) ?>')">
-                                            <i class="fa-solid fa-pen-to-square"></i> 重命名
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="renameDevice('<?= $dev['code'] ?>', '<?= addslashes($dev['device_name']) ?>')">
+                                            <i class="fa-solid fa-pen-to-square me-1"></i> 重命名
                                         </button>
                                         <form method="POST" onsubmit="return confirm('确定要删除此设备吗？')">
                                             <input type="hidden" name="action" value="delete_device">
                                             <input type="hidden" name="device_code" value="<?= $dev['code'] ?>">
-                                            <button type="submit" class="btn btn-outline">
-                                                <i class="fa-solid fa-trash-can"></i> 删除
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fa-solid fa-trash-can me-1"></i> 删除
                                             </button>
                                         </form>
                                     </div>
@@ -180,5 +151,6 @@ function renameDevice(code, oldName) {
     }
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

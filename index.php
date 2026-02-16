@@ -8,6 +8,7 @@ $user = get_current_user_info();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kykky Kindle - 你的 Kindle 阅读数据中心</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -18,67 +19,80 @@ $user = get_current_user_info();
 <section class="hero">
     <div class="container">
         <h1>阅读，不再孤单。</h1>
-        <p>自动同步 Kindle 阅读记录，与同好一起发现阅读的乐趣。</p>
+        <p class="lead">自动同步 Kindle 阅读记录，与同好一起发现阅读的乐趣。</p>
         
-        <div class="main-actions">
+        <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
             <?php if (!$user): ?>
-                <a href="/login.php" class="btn btn-primary">使用 GitHub 登录</a>
+                <a href="/login.php" class="btn btn-primary btn-lg">使用 GitHub 登录</a>
             <?php else: ?>
-                <a href="/user.php" class="btn btn-primary">进入个人中心</a>
-                <a href="/rank.php" class="btn btn-outline" style="padding: 12px 30px; font-size: 16px; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">查看排行榜</a>
+                <a href="/user.php" class="btn btn-primary btn-lg">进入个人中心</a>
+                <a href="/rank.php" class="btn btn-outline-light btn-lg">查看排行榜</a>
             <?php endif; ?>
         </div>
     </div>
 </section>
 
-<div class="container">
-    <div class="feature-grid">
-        <div class="card feature-item">
-            <i class="fa-solid fa-bolt"></i> <h3>实时数据统计</h3>
-            <p>通过 Kindle 自动云备份与数据处理，无需插线即可实时同步阅读时长，并在全网排行中展示你的进度。</p>
-            <a href="/rank.php" class="btn btn-outline">
-                <i class="fa-solid fa-ranking-star"></i> 立即查看排行榜
-            </a>
+<div class="container py-4">
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-bolt fa-2x text-primary mb-3"></i>
+                    <h5 class="card-title">实时数据统计</h5>
+                    <p class="card-text text-secondary">通过 Kindle 自动云备份与数据处理，无需插线即可实时同步阅读时长，并在全网排行中展示你的进度。</p>
+                    <a href="/rank.php" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-ranking-star me-1"></i> 立即查看排行榜
+                    </a>
+                </div>
+            </div>
         </div>
-        
-        <div class="card feature-item">
-            <i class="fa-solid fa-chart-pie"></i> 
-            <h3>传统本地数据分析</h3>
-            <p>想要更详细的图表？不希望数据被上传？我们保留了经典的本地化分析工具，支持查看历史趋势与阅读分布。</p>
-            <a href="/origin/" class="btn btn-outline">
-                <i class="fa-solid fa-flask-vial"></i> 进入本地分析模式
-            </a>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-chart-pie fa-2x text-primary mb-3"></i>
+                    <h5 class="card-title">用户数据分析</h5>
+                    <p class="card-text text-secondary">想要更详细的图表？查看历史趋势与阅读分布，生成专属于你的阅读分析报告。</p>
+                    <a href="/analysis.php" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-chart-column me-1"></i> 进入数据分析
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     <?php if ($user): ?>
-    <div class="card">
-        <h3><i class="fa-solid fa-rocket"></i> 快速操作</h3>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <a href="/upload.php" class="btn btn-outline">
-                <i class="fa-solid fa-cloud-arrow-up"></i> 手动更新日志
-            </a>
-            <a href="user.php?action=download_backup" class="btn btn-primary">
-                <i class="fa-solid fa-file-zipper"></i> 打包下载备份 (.zip)
-            </a>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="fa-solid fa-rocket me-1"></i> 快速操作</h5>
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+                <a href="/upload.php" class="btn btn-outline-primary">
+                    <i class="fa-solid fa-cloud-arrow-up me-1"></i> 手动更新日志
+                </a>
+                <a href="/api/files.php?action=download_backup" class="btn btn-primary">
+                    <i class="fa-solid fa-file-zipper me-1"></i> 打包下载备份 (.zip)
+                </a>
+            </div>
         </div>
     </div>
     <?php endif; ?>
 
-    <div class="card" style="background: transparent; border-style: dashed;">
-        <h4 style="margin-top: 0;">如何开始？</h4>
-        <ol style="color: var(--text-muted); padding-left: 20px;">
-            <li>登录并前往个人中心。</li>
-            <li>在Kindle上安装插件并注册你的设备以进行同步。</li>
-            <li>在 Kindle 插件内启动同步，或手动在此处上传 <code>log</code> 文件夹。</li>
-            <li>从此你的每一分钟阅读都将被铭记。</li>
-        </ol>
+    <div class="card border-dashed mb-4" style="background: transparent; border-style: dashed;">
+        <div class="card-body">
+            <h5 class="card-title">如何开始？</h5>
+            <ol class="text-secondary ps-3">
+                <li>登录并前往个人中心。</li>
+                <li>在Kindle上安装插件并注册你的设备以进行同步。</li>
+                <li>在 Kindle 插件内启动同步，或手动在此处上传 <code>log</code> 文件夹。</li>
+                <li>从此你的每一分钟阅读都将被铭记。</li>
+            </ol>
+        </div>
     </div>
 </div>
 
-<footer style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 12px;">
+<footer class="text-center py-4 text-secondary small">
     &copy; <?= date('Y') ?> Kykky Project. TQHYG.
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

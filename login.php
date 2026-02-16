@@ -78,23 +78,27 @@ if ($user) {
     <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>登录成功 - Kykky</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="/style.css">
     </head>
     <body>
         <?php include __DIR__ . '/func/header.php'; ?>
         <div class="container">
-            <div class="card login-box" style="margin-top: 100px;">
-                <div style="font-size: 48px; color: var(--success); margin-bottom: 20px;">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <h3>欢迎回来，<?= htmlspecialchars($user['nickname']) ?></h3>
-                <p style="color: var(--text-muted);">
-                    登录成功！我们将于 <span id="timer" style="font-weight: bold; color: var(--primary);">3</span> 秒后为您跳转。
-                </p>
-                <div style="margin-top: 20px;">
-                    <a href="<?= $goto ?>" class="btn btn-outline">立即跳转</a>
+            <div class="card shadow-sm mx-auto text-center" style="max-width:400px; margin-top: 100px;">
+                <div class="card-body py-5">
+                    <div class="text-success mb-3" style="font-size: 48px;">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3>欢迎回来，<?= htmlspecialchars($user['nickname']) ?></h3>
+                    <p class="text-secondary">
+                        登录成功！我们将于 <span id="timer" class="fw-bold text-primary">3</span> 秒后为您跳转。
+                    </p>
+                    <div class="mt-3">
+                        <a href="<?= $goto ?>" class="btn btn-outline-primary">立即跳转</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -110,6 +114,7 @@ if ($user) {
                 if (timerEl) timerEl.innerText = s;
             }, 1000);
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
     </html>
     <?php
@@ -132,7 +137,9 @@ $github_url = $config['oauth']['url_authorize'] . "?" . http_build_query([
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - Kykky 阅读数据统计</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
 </head>
@@ -140,23 +147,27 @@ $github_url = $config['oauth']['url_authorize'] . "?" . http_build_query([
     <?php include __DIR__ . '/func/header.php'; ?>
     
     <div class="container">
-        <div class="card login-box">
-            <div style="font-size: 40px; margin-bottom: 20px; color: var(--text);">
-                <i class="fa-solid fa-book-bookmark"></i>
-            </div>
-            <h2 style="margin-bottom: 10px;">账号登录</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">
-                同步您的 Kindle 阅读数据，参与全球排名
-            </p>
-            
-            <a href="<?= $github_url ?>" class="btn btn-github" style="box-sizing: border-box; display: flex; padding: 1em;">
-                <i class="fa-brands fa-github"></i> 使用 GitHub 账号登录
-            </a>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted);">
-                登录即代表您同意我们的隐私政策与数据同步协议
+        <div class="card shadow-sm mx-auto text-center" style="max-width:400px; margin-top: 80px;">
+            <div class="card-body py-5">
+                <div class="mb-3" style="font-size: 40px;">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <h2 class="mb-2">账号登录</h2>
+                <p class="text-secondary small mb-4">
+                    同步您的 Kindle 阅读数据，参与全球排名
+                </p>
+                
+                <a href="<?= $github_url ?>" class="btn d-flex align-items-center justify-content-center gap-2 py-2"
+                   style="background-color: #24292e; color: #fff; border: none;">
+                    <i class="fa-brands fa-github"></i> 使用 GitHub 账号登录
+                </a>
+                
+                <div class="mt-4 pt-3 border-top small text-secondary">
+                    登录即代表您同意我们的隐私政策与数据同步协议
+                </div>
             </div>
         </div>
     </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

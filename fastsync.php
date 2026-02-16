@@ -57,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_sync']) && $d
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>快捷同步确认 - Kykky 阅读数据统计</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -64,43 +65,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_sync']) && $d
 
 <?php include __DIR__ . '/func/header.php'; ?>
 
-<div class="container">
-    <div class="card sync-card">
-        <h3 class="text-center"><i class="fa-solid fa-qrcode"></i> 快捷同步</h3>
-        
-        <?php if ($error): ?>
-            <div class="alert alert-danger" style="color:var(--danger); background:#ffebe9; padding:15px; border-radius:6px; margin-top:20px;">
-                <i class="fa-solid fa-circle-exclamation"></i> <?= htmlspecialchars($error) ?>
-            </div>
-            <a href="/user.php" class="btn btn-outline w-100 mt-3" style="display:block; text-align:center;">返回用户中心</a>
-        <?php elseif ($data): ?>
-            <p class="text-muted text-center">检测到来自您的 Kindle 的阅读数据：</p>
+<div class="container" style="max-width: 500px;">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h3 class="text-center mb-3"><i class="fa-solid fa-qrcode"></i> 快捷同步</h3>
             
-            <div class="data-preview">
-                <div class="data-row">
-                    <span class="data-label">今日阅读</span>
-                    <span class="data-value"><?= format_duration($data['today']) ?></span>
+            <?php if ($error): ?>
+                <div class="alert alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i> <?= htmlspecialchars($error) ?>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">本月阅读</span>
-                    <span class="data-value"><?= format_duration($data['month']) ?></span>
+                <a href="/user.php" class="btn btn-outline-primary w-100">返回用户中心</a>
+            <?php elseif ($data): ?>
+                <p class="text-secondary text-center">检测到来自您的 Kindle 的阅读数据：</p>
+                
+                <div class="data-preview">
+                    <div class="data-row">
+                        <span class="data-label">今日阅读</span>
+                        <span class="data-value"><?= format_duration($data['today']) ?></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">本月阅读</span>
+                        <span class="data-value"><?= format_duration($data['month']) ?></span>
+                    </div>
+                    <div class="data-row border-top pt-2 mt-2" style="font-size: 12px;">
+                        <span class="data-label">设备标识</span>
+                        <span class="data-value text-secondary" style="font-weight:normal;"><?= htmlspecialchars(substr($data['did'], 0, 8)) ?>...</span>
+                    </div>
                 </div>
-                <div class="data-row" style="font-size: 12px; border-top: 1px solid #ddd; pt-2; margin-top: 10px;">
-                    <span class="data-label">设备标识</span>
-                    <span class="data-value text-muted" style="font-weight:normal;"><?= htmlspecialchars(substr($data['did'], 0, 8)) ?>...</span>
-                </div>
-            </div>
 
-            <form method="POST">
-                <input type="hidden" name="confirm_sync" value="1">
-                <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 16px;">
-                    <i class="fa-solid fa-check-double"></i> 确认覆盖并同步
-                </button>
-            </form>
-            <p class="text-center mt-3 small text-muted">确认后将覆盖您当前的排行榜数据</p>
-        <?php endif; ?>
+                <form method="POST">
+                    <input type="hidden" name="confirm_sync" value="1">
+                    <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 16px;">
+                        <i class="fa-solid fa-check-double"></i> 确认覆盖并同步
+                    </button>
+                </form>
+                <p class="text-center mt-3 small text-secondary">确认后将覆盖您当前的排行榜数据</p>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

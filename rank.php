@@ -4,8 +4,8 @@ require_once __DIR__ . '/func/common.php';
 
 // --- 逻辑处理：API 接口部分 ---
 if (isset($_GET['api'])) {
-    $type = $_GET['type'] ?? 'today';
-    $page = (int)($_GET['page'] ?? 1);
+    $type = in_array($_GET['type'] ?? '', ['today', 'month']) ? $_GET['type'] : 'today';
+    $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = 20;
     $offset = ($page - 1) * $limit;
     $sort_field = ($type === 'month') ? 'month_seconds' : 'today_seconds';
@@ -43,9 +43,9 @@ if (isset($_GET['api'])) {
             LEFT JOIN users u ON s.user_id = u.id
             WHERE s.{$sort_field} > 0
             ORDER BY s.{$sort_field} DESC 
-            LIMIT {$limit} OFFSET {$offset}";
+            LIMIT ? OFFSET ?";
     
-    $response['list'] = db_query($sql);
+    $response['list'] = db_query($sql, [$limit, $offset]);
 
     header('Content-Type: application/json');
     echo json_encode($response);
@@ -53,7 +53,7 @@ if (isset($_GET['api'])) {
 }
 
 // --- 页面显示部分 ---
-$type = $_GET['type'] ?? 'today';
+$type = in_array($_GET['type'] ?? '', ['today', 'month']) ? $_GET['type'] : 'today';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -61,6 +61,7 @@ $type = $_GET['type'] ?? 'today';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>阅读排行榜 - Kykky 阅读数据统计</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
 </head>
@@ -68,29 +69,36 @@ $type = $_GET['type'] ?? 'today';
 
 <?php include __DIR__ . '/func/header.php'; ?>
 
-<div class="container">
-    <div class="tab-nav">
-        <a href="?type=today" class="<?= $type == 'today' ? 'active' : '' ?>">
-            <i class="fa-solid fa-calendar-day"></i> 日榜
-        </a>
-        <a href="?type=month" class="<?= $type == 'month' ? 'active' : '' ?>">
-            <i class="fa-solid fa-calendar-days"></i> 月榜
-        </a>
-    </div>
+<div class="container py-4">
+    <ul class="nav nav-pills justify-content-center mb-4">
+        <li class="nav-item">
+            <a class="nav-link <?= $type == 'today' ? 'active' : '' ?>" href="?type=today">
+                <i class="fa-solid fa-calendar-day me-1"></i> 日榜
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <?= $type == 'month' ? 'active' : '' ?>" href="?type=month">
+                <i class="fa-solid fa-calendar-days me-1"></i> 月榜
+            </a>
+        </li>
+    </ul>
 
     <div id="my-rank-container"></div>
 
-    <div class="card" style="padding: 0;"> <div class="rank-list" id="rank-content"></div>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="rank-list" id="rank-content"></div>
+        </div>
     </div>
 
-    <div style="text-align: center; margin-top: 20px;">
-        <button id="load-more" class="btn btn-outline" style="width: 200px; justify-content: center;">点击加载更多</button>
+    <div class="text-center mt-4 mb-4">
+        <button id="load-more" class="btn btn-outline-primary" style="min-width: 200px;">点击加载更多</button>
     </div>
 </div>
 
 <script>
 let currentPage = 1;
-const type = '<?= $type ?>';
+const type = '<?= htmlspecialchars($type, ENT_QUOTES, "UTF-8") ?>';
 const contentDiv = document.getElementById('rank-content');
 const loadMoreBtn = document.getElementById('load-more');
 let isEnd = false;
@@ -120,12 +128,11 @@ async function fetchRank() {
         // 处理个人排名（仅在第一页显示）
         if (currentPage === 1 && myRank) {
             const myRankHtml = `
-                <div class="my-rank-card">
-                <div class="rank-num">${myRank.rank}</div>
-                    <span class="label">我的排名</span>
-                    <div class="info" style="margin-left:20px;">
-                        <span class="user-name">当前状态</span>
-                        <span class="duration">已阅读: ${formatDuration(myRank.seconds)}</span>
+                <div class="alert alert-info d-flex align-items-center gap-3">
+                    <div class="rank-num fs-3 fw-bold text-primary">${myRank.rank}</div>
+                    <div>
+                        <strong>我的排名</strong><br>
+                        <small class="text-secondary">已阅读: ${formatDuration(myRank.seconds)}</small>
                     </div>
                 </div>
             `;
@@ -196,5 +203,6 @@ window.onscroll = function() {
 
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

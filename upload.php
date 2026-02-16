@@ -64,7 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>数据更新 - Kykky 阅读数据统计</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="/style.css">
 </head>
@@ -72,27 +74,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <?php include __DIR__ . '/func/header.php'; ?>
 
 <div class="container" style="max-width: 600px;">
-    <div class="card">
-        <h3 style="margin-top:0;"><i class="fa-solid fa-cloud-arrow-up"></i> 手动同步阅读日志</h3>
-        
-        <div class="alert alert-warning">
-            <i class="fa-solid fa-triangle-exclamation"></i> 
-            <strong>注意：</strong>上传将以本次数据为准更新排行榜，并覆盖旧的日志备份。
-        </div>
-
-        <div id="drop-zone" class="upload-zone">
-            <input type="file" id="file-input" webkitdirectory directory multiple hidden>
-            <div class="icon-box">
-                <i class="fa-solid fa-folder-tree"></i>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h3 class="mb-3"><i class="fa-solid fa-cloud-arrow-up"></i> 手动同步阅读日志</h3>
+            
+            <div class="alert alert-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i> 
+                <strong>注意：</strong>上传将以本次数据为准更新排行榜，并覆盖旧的日志备份。
             </div>
-            <h4>拖拽 log 文件夹或点击选择</h4>
-            <p>请选择包含 <code>history.gz</code> 的 Kindle 日志目录</p>
-            <div id="file-list" class="file-preview-list"></div>
-        </div>
 
-        <button id="upload-btn" class="btn btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;" disabled>
-            开始解析并同步
-        </button>
+            <div id="drop-zone" class="upload-zone">
+                <input type="file" id="file-input" webkitdirectory directory multiple hidden>
+                <div class="icon-box">
+                    <i class="fa-solid fa-folder-tree"></i>
+                </div>
+                <h4>拖拽 log 文件夹或点击选择</h4>
+                <p class="text-secondary mb-0">请选择包含 <code>history.gz</code> 的 Kindle 日志目录</p>
+                <div id="file-list" class="mt-2 text-success fw-bold"></div>
+            </div>
+
+            <button id="upload-btn" class="btn btn-primary w-100 mt-3 py-2" disabled>
+                开始解析并同步
+            </button>
+        </div>
     </div>
 </div>
 
@@ -235,5 +239,6 @@ uploadBtn.onclick = async () => {
 };
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

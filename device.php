@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>设备绑定 - Kykky 阅读数据统计</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
 </head>
@@ -38,39 +39,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="container" style="max-width: 500px;">
         <?php if ($device['status'] == 1): ?>
-            <div class="card" style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 48px; color: var(--success); margin-bottom: 20px;">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <h2 style="margin-bottom: 10px;">绑定成功！</h2>
-                <p style="color: var(--text-muted); margin-bottom: 30px;">
-                    设备 <strong><?= htmlspecialchars($device['device_name']) ?></strong> 已与您的账号关联。
-                </p>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <a href="/user.php" class="btn btn-primary">前往用户中心</a>
-                    <a href="/rank.php" class="btn btn-outline">查看排行榜</a>
+            <div class="card shadow-sm text-center">
+                <div class="card-body py-5">
+                    <div class="text-success mb-3" style="font-size: 48px;">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h2 class="mb-2">绑定成功！</h2>
+                    <p class="text-secondary mb-4">
+                        设备 <strong><?= htmlspecialchars($device['device_name']) ?></strong> 已与您的账号关联。
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/user.php" class="btn btn-primary">前往用户中心</a>
+                        <a href="/rank.php" class="btn btn-outline-primary">查看排行榜</a>
+                    </div>
                 </div>
             </div>
 
         <?php else: ?>
-            <div class="card">
-                <h3 style="margin-top: 0;"><i class="fa-solid fa-link"></i> 最后一步：绑定设备</h3>
-                <p style="color: var(--text-muted); font-size: 14px;">
-                    您好 <strong><?= htmlspecialchars($user['nickname']) ?></strong>，请为您的新 Kindle 起一个好听的名字：
-                </p>
-                
-                <form method="POST" style="margin-top: 20px;">
-                    <div style="margin-bottom: 20px;">
-                        <input type="text" name="device_name" class="form-control" 
-                               placeholder="例如：我的 KPW5 / 卧室的 Kindle" required 
-                               style="width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
-                        确认并完成绑定
-                    </button>
-                </form>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="mb-2"><i class="fa-solid fa-link"></i> 最后一步：绑定设备</h3>
+                    <p class="text-secondary small">
+                        您好 <strong><?= htmlspecialchars($user['nickname']) ?></strong>，请为您的新 Kindle 起一个好听的名字：
+                    </p>
+                    
+                    <form method="POST" class="mt-3">
+                        <div class="mb-3">
+                            <input type="text" name="device_name" class="form-control" 
+                                   placeholder="例如：我的 KPW5 / 卧室的 Kindle" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            确认并完成绑定
+                        </button>
+                    </form>
+                </div>
             </div>
         <?php endif; ?>
     </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

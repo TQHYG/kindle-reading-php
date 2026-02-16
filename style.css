@@ -1,372 +1,57 @@
-/* style.css - Bootstrap 5 Simulator */
-:root {
-    /* Bootstrap 5 调色板 */
-    --bs-blue: #0d6efd;
-    --bs-indigo: #6610f2;
-    --bs-green: #198754;
-    --bs-red: #dc3545;
-    --bs-yellow: #ffc107;
-    --bs-gray: #6c757d;
-    --bs-gray-dark: #343a40;
-    --bs-light: #f8f9fa;
-    --bs-dark: #212529;
-    --bs-white: #fff;
-    --bs-border-color: #dee2e6;
-    
-    /* 语义变量 */
-    --primary: var(--bs-blue);
-    --success: var(--bs-green);
-    --danger: var(--bs-red);
-    --warning: var(--bs-yellow);
-    --text-main: #212529;
-    --text-muted: #6c757d;
-    --body-bg: var(--bs-light);
-    --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    --border-radius: 0.375rem; /* 6px */
-    --border-radius-lg: 0.5rem; /* 8px */
-}
+/* style.css - Kykky 项目自定义样式（配合 Bootstrap 5 CDN 使用） */
 
-/* --- 全局重置 --- */
-*, ::after, ::before { box-sizing: border-box; }
+/* ===== 全局微调 ===== */
+body { background-color: #f8f9fa; }
 
-body {
-    margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--text-main);
-    background-color: var(--body-bg);
-}
-
-a { text-decoration: none; color: var(--primary); transition: color 0.15s ease-in-out; }
-a:hover { color: #0a58ca; }
-
-/* --- 布局容器 --- */
-.container {
-    width: 100%;
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
-    margin-right: auto;
-    margin-left: auto;
-    max-width: 960px; /* 限制最大宽度 */
-}
-
-/* --- Header (针对提供的 PHP 代码适配) --- */
-header {
-    background-color: var(--bs-dark);
-    padding: 0.75rem 0;
-    color: white;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 5%; /* 保持一定的左右边距 */
-}
-
-header .logo a {
-    color: white;
-    font-size: 1.25rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-header nav {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-header nav a {
-    color: rgba(255, 255, 255, 0.75);
-    font-weight: 500;
-}
-header nav a:hover { color: rgba(255, 255, 255, 1); }
-
-/* 修正 header 中的用户头像显示 */
-header nav .user-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    margin-right: 6px;
-    border: 1px solid rgba(255,255,255,0.3);
-}
-
-/* 退出按钮特殊样式 */
-.btn-logout { color: var(--danger) !important; }
-
-/* --- 卡片组件 (Card) --- */
-.card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    word-wrap: break-word;
-    background-color: var(--bs-white);
-    background-clip: border-box;
-    border: 1px solid rgba(0,0,0,.125);
-    border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-/* --- 按钮 (Button) --- */
-.btn {
-    display: inline-block;
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: center;
-    text-decoration: none;
-    vertical-align: middle;
-    user-select: none;
-    background-color: transparent;
-    border: 1px solid transparent;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    border-radius: var(--border-radius);
-    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    cursor: pointer;
-}
-
-.btn i { margin-right: 0.4rem; }
-
-.btn-primary {
-    color: #fff;
-    background-color: var(--primary);
-    border-color: var(--primary);
-}
-.btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
-    color: #fff;
-}
-.btn-primary:disabled {
-    background-color: #6592d6;
-    border-color: #6592d6;
-    cursor: not-allowed;
-}
-
-.btn-outline {
-    color: var(--primary);
-    border-color: var(--primary);
-}
-.btn-outline:hover {
-    color: #fff;
-    background-color: var(--primary);
-}
-
-.btn-github {
-    background-color: var(--bs-dark);
-    color: white !important;
-}
-
-/* --- 表单 (Form) --- */
-.form-control {
-    display: block;
-    width: 100%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--text-main);
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: var(--border-radius);
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-
-.form-control:focus {
-    color: var(--text-main);
-    background-color: #fff;
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
-}
-
-/* --- 表格 (Table) --- */
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-.table {
-    width: 100%;
-    margin-bottom: 1rem;
-    color: var(--text-main);
-    vertical-align: top;
-    border-color: var(--bs-border-color);
-    border-collapse: collapse;
-}
-.table th, .table td {
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid var(--bs-border-color);
-    text-align: left;
-}
-.table th { font-weight: 600; background-color: rgba(0,0,0,0.02); }
-
-/* --- 警告框 (Alert) --- */
-.alert {
-    position: relative;
-    padding: 1rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: var(--border-radius);
-}
-.alert-warning {
-    color: #664d03;
-    background-color: #fff3cd;
-    border-color: #ffecb5;
-}
-.alert-danger {
-    color: #842029;
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
-}
-
-/* --- 具体页面样式 --- */
-
-/* 1. 首页 (index.php) */
+/* ===== 首页 Hero ===== */
 .hero {
-    background-color: var(--bs-dark);
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
     color: white;
-    padding: 4rem 0 5rem;
-    margin-top: -1.5rem; /* 抵消 header 的 padding-bottom */
-    margin-bottom: 3rem;
+    padding: 5rem 0;
     text-align: center;
 }
-.hero h1 { font-weight: 700; font-size: 2.5rem; margin-bottom: 1rem; }
-.hero p { font-size: 1.25rem; font-weight: 300; opacity: 0.8; margin-bottom: 2rem; }
-.main-actions { display: flex; gap: 1rem; justify-content: center; }
+.hero h1 { font-weight: 700; font-size: 2.5rem; }
+.hero p { font-size: 1.2rem; opacity: 0.8; }
 
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-}
-.feature-item h3 { font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0; }
-.feature-item i { color: var(--primary); margin-bottom: 0.5em;}
-.feature-item p { color: var(--text-muted); margin-bottom: 1.5rem; }
-
-/* 2. 排行榜 (rank.php) */
-.tab-nav {
-    display: flex;
-    background: #fff;
-    padding: 0.25rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--bs-border-color);
-    margin-bottom: 1.5rem;
-    margin-top: 1.5rem;
-}
-.tab-nav a {
-    flex: 1;
-    text-align: center;
-    padding: 0.5rem;
-    border-radius: var(--border-radius);
-    color: var(--text-muted);
-    font-weight: 500;
-}
-.tab-nav a.active {
-    background-color: var(--primary);
-    color: white;
-}
-
-/* 列表样式 */
+/* ===== 排行榜 ===== */
 .rank-item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--bs-border-color);
 }
 .rank-item:last-child { border-bottom: none; }
-.rank-num { width: 40px; text-align: center; font-weight: 700; color: var(--text-muted); font-size: 1.1rem; }
-.rank-num.top-3 { color: var(--bs-yellow); }
-.rank-item img.user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-.user-info { margin-left: 1rem; flex-grow: 1; }
-.user-info .user-name { font-weight: 600; display: block; color: var(--text-main); }
-.user-info .duration { font-size: 0.875rem; color: var(--text-muted); }
+.rank-num { width: 40px; text-align: center; font-weight: 700; color: var(--bs-secondary); font-size: 1.1rem; }
+.rank-num.top-3 { color: var(--bs-warning); }
 
-/* 我的排名卡片 */
-.my-rank-card {
-    background-color: #e7f1ff;
-    border: 1px solid #b6d4fe;
-    color: #084298;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.my-rank-card .rank-num { background: rgba(255,255,255,0.6); border-radius: 0.25rem; color: var(--primary); padding: 0.25rem 0; }
+/* ===== 用户中心统计卡片 ===== */
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--bs-primary); }
+.stat-label { color: var(--bs-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
 
-/* 3. 用户中心 (user.php) */
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-.profile-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #e9ecef; }
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin: 1.5rem 0;
-}
-.stat-card {
-    background: #fff;
-    border: 1px solid var(--bs-border-color);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    text-align: center;
-}
-.stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
-.stat-label { color: var(--text-muted); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 1px; }
-
-.code-badge { font-family: monospace; background: #e9ecef; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
-
-/* 4. 上传页 (upload.php) */
+/* ===== 上传区域 ===== */
 .upload-zone {
-    border: 2px dashed #dee2e6;
-    border-radius: var(--border-radius-lg);
+    border: 2px dashed var(--bs-border-color);
+    border-radius: 0.5rem;
     padding: 3rem 1rem;
     text-align: center;
-    background-color: #f8f9fa;
+    background-color: var(--bs-light);
     transition: all 0.2s;
     cursor: pointer;
 }
 .upload-zone:hover, .upload-zone.hover {
-    border-color: var(--primary);
+    border-color: var(--bs-primary);
     background-color: #e9ecef;
 }
-.upload-zone .icon-box { font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem; }
+.upload-zone .icon-box { font-size: 3rem; color: var(--bs-secondary); margin-bottom: 1rem; }
 
-/* 5. 登录页 (login.php) */
-.login-box {
-    max-width: 400px;
-    margin: 3rem auto;
-    text-align: center;
-}
+/* ===== 快捷同步数据预览 ===== */
+.data-preview { margin: 1.5rem 0; }
+.data-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #eee; }
+.data-label { color: var(--bs-secondary); }
+.data-value { font-weight: 600; }
 
-/* --- 响应式设计 --- */
+/* ===== 响应式 ===== */
 @media (max-width: 768px) {
-    /* Header 堆叠 */
-    header { flex-direction: column; gap: 1rem; align-items: center; padding: 1rem; }
-    header nav { width: 100%; justify-content: center; flex-wrap: wrap; gap: 0.8rem; }
-    
-    /* 统计卡片变单列 */
-    .stats-grid { grid-template-columns: 1fr; }
-    
-    /* 首页 Hero */
     .hero { padding: 3rem 1rem; }
-    .hero h1 { font-size: 2rem; }
-    .main-actions { flex-direction: column; }
-    .main-actions .btn { width: 100%; }
-
-    /* 表格中的按钮在移动端换行 */
-    .table td .btn { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .hero h1 { font-size: 1.8rem; }
 }
