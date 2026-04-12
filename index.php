@@ -33,6 +33,23 @@ $user = get_current_user_info();
 </section>
 
 <div class="container py-4">
+    <div class="alert alert-warning border-0 shadow-sm mb-4" role="alert" style="background: linear-gradient(90deg, #fff3cd 0%, #ffe8a3 100%);">
+        <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+            <div>
+                <h5 class="mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> 安装教程很重要，请先看这里</h5>
+                <p class="mb-0 text-dark">首次使用请先阅读介绍与安装步骤，按教程配置后再开始同步，能避免大多数问题。</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="https://www.tqhyg.net/post673.html" target="_blank" rel="noopener noreferrer" class="btn btn-dark">
+                    <i class="fa-solid fa-book-open me-1"></i> 博客介绍文章
+                </a>
+                <a href="https://github.com/TQHYG/kykky" target="_blank" rel="noopener noreferrer" class="btn btn-danger">
+                    <i class="fa-brands fa-github me-1"></i> GitHub 安装教程
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4 mb-4">
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
