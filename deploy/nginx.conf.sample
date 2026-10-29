@@ -64,6 +64,10 @@ server {
     location = /style.css    { return 302 /assets/css/app.css; }
     location = /favicon.ico  { access_log off; return 204; }
 
+    # 配置文件位于 Web 根目录，必须禁止直接访问
+    location = /config.php        { deny all; }
+    location = /config.sample.php { deny all; }
+
     location ~ /\.(?!well-known) {
         deny all;
         return 404;

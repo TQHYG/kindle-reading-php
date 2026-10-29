@@ -58,13 +58,18 @@ mysql -uroot -p kykky_db < api/sql/schema.sql
 
 ### 3. 配置
 
+配置文件放在 Web 根目录 `config.php`，由 nginx 明确拒绝外部访问。
+
 ```bash
-sudo mkdir -p /etc/kykky /var/lib/kykky/storage
-sudo cp api/config.sample.php /etc/kykky/config.php
-sudo chown root:www-data /etc/kykky/config.php   # Fedora 用 apache
-sudo chmod 640 /etc/kykky/config.php
+cd /path/to/kindle-reading-php
+cp config.sample.php config.php
+sudo chown root:www-data config.php    # Fedora 使用 root:apache
+sudo chmod 640 config.php
+sudo mkdir -p /var/lib/kykky/storage
 sudo chown -R www-data:www-data /var/lib/kykky   # Fedora 用 apache
 ```
+
+也可以通过环境变量 `KYKKY_CONFIG` 指向其他配置文件。
 
 重点配置：
 
@@ -80,7 +85,7 @@ sudo chown -R www-data:www-data /var/lib/kykky   # Fedora 用 apache
 
 - Web 根目录指向项目静态文件目录；
 - 只有 `/api/*.php` 交给 PHP-FPM；
-- 禁止访问 `api/lib`、`api/sql`、`api/config*`、`docs`、`deploy`；
+- 禁止访问 `config.php`、`config.sample.php`、`api/lib`、`api/sql`、`docs`、`deploy`；
 - 旧入口 `/share.php`、`/device.php`、`/fastsync.php` 等 302 到静态页面；
 - 传入 `HTTP_AUTHORIZATION`，Kindle 的 Bearer Token 才能生效；
 - `client_max_body_size` 至少 32m。

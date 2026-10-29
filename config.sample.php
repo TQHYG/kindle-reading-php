@@ -2,9 +2,10 @@
 /**
  * Kykky 服务端配置示例
  *
- * 复制到 /etc/kykky/config.php（推荐，Web 根目录之外）。
+ * 复制为 Web 根目录下的 config.php。
+ * 必须确保 Nginx 拒绝访问 /config.php 与 /config.sample.php。
  *
- * 可通过环境变量 KYKKY_CONFIG 指定配置文件路径。
+ * 可通过环境变量 KYKKY_CONFIG 指定其他配置文件路径。
  */
 return [
     'app' => [

@@ -1,7 +1,8 @@
 <?php
 /**
  * 配置加载与访问。
- * 配置不会放在 Web 可访问的默认位置：优先 /etc/kykky/config.php。
+ * 默认读取 Web 根目录的 config.php；Nginx 必须显式拒绝访问该文件。
+ * 也支持通过 KYKKY_CONFIG 或 /etc/kykky/config.php 覆盖。
  */
 
 function kykky_config(): array
@@ -16,6 +17,7 @@ function kykky_config(): array
     if (is_string($envPath) && $envPath !== '') {
         $candidates[] = $envPath;
     }
+    $candidates[] = dirname(__DIR__, 2) . '/config.php';
     $candidates[] = '/etc/kykky/config.php';
 
     $path = null;
@@ -26,7 +28,7 @@ function kykky_config(): array
         }
     }
     if ($path === null) {
-        throw new RuntimeException('Kykky 配置文件不存在，请参考 api/config.sample.php');
+        throw new RuntimeException('Kykky 配置文件不存在，请参考 config.sample.php');
     }
 
     $loaded = require $path;

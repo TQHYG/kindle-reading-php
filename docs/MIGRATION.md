@@ -63,6 +63,13 @@ CREATE INDEX idx_devices_pending ON devices (status, created_at);
 
 代码仍兼容读取 `security.token_secret` 和顶层 `app_secret`，但建议迁移到 `security.app_secret`。
 
+2.0 默认读取 Web 根目录的 `config.php`。该文件必须由 nginx 拒绝直接访问，示例配置已包含：
+
+```nginx
+location = /config.php        { deny all; }
+location = /config.sample.php { deny all; }
+```
+
 新增配置：
 
 ```php
@@ -110,7 +117,7 @@ nginx 已保留 `/callback.php` 和 `/login.php` 到新地址/静态页的兼容
 
 - 只有 `/api/*.php` 交给 PHP-FPM；
 - 静态文件目录不执行 PHP；
-- 禁止访问 `/api/lib`、`/api/sql`、`/api/config*`、`/docs`、`/deploy`；
+- 禁止访问 `/config.php`、`/config.sample.php`、`/api/lib`、`/api/sql`、`/docs`、`/deploy`；
 - 传递 `HTTP_AUTHORIZATION`；
 - 为旧链接配置 302：
   - `/share.php` → `/share.html`

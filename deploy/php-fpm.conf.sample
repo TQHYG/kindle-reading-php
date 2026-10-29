@@ -24,4 +24,4 @@ php_value[upload_max_filesize] = 25M
 php_value[post_max_size] = 32M
 
 ; 可选：显式指定配置文件路径
-; env[KYKKY_CONFIG] = /etc/kykky/config.php
+; env[KYKKY_CONFIG] = /var/www/kindle-reading-php/config.php
