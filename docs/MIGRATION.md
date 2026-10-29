@@ -2,9 +2,11 @@
 
 ## 数据库变化
 
-**原有 `users` / `stats` / `devices` 表结构不需要修改。**
+**`users` / `devices` 表结构不变；`stats` 表新增两个统计列。**
 
-新增一张持久登录会话表：
+### v2：持久登录会话
+
+新增一张 `sessions` 表：
 
 ```sql
 CREATE TABLE IF NOT EXISTS sessions (
@@ -30,6 +32,40 @@ CREATE TABLE IF NOT EXISTS sessions (
 ```bash
 mysql -uroot -p kykky_db < api/sql/migration_v2_sessions.sql
 ```
+
+### v3：周榜 / 总榜字段
+
+`stats` 表新增：
+
+```sql
+ALTER TABLE stats
+    ADD COLUMN week_seconds INT UNSIGNED NOT NULL DEFAULT 0 AFTER today_seconds,
+    ADD COLUMN total_seconds INT UNSIGNED NOT NULL DEFAULT 0 AFTER month_seconds;
+
+CREATE INDEX idx_stats_week ON stats (week_seconds);
+CREATE INDEX idx_stats_total ON stats (total_seconds);
+```
+
+推荐直接执行幂等迁移脚本：
+
+```bash
+mysql -uroot -p kykky_db < api/sql/migration_v3_week_total.sql
+```
+
+迁移后新列默认值为 0。执行一次重算即可根据已上传日志回填：
+
+```bash
+sudo -u www-data php /var/www/kindle-reading-php/api/recalculate_stats.php
+# Fedora: sudo -u apache ...
+```
+
+### 兼容性
+
+- 旧客户端上传日志时，服务端会重新解析日志并计算 `week/total`，不会因为旧客户端没传字段而丢失。
+- 如果旧客户端只上传当前月日志、没有 `history.gz`，服务端不会把 `total_seconds` 计算得比数据库原值更低。
+- 旧客户端只上报今日/本月、且没有上传文件时，只更新 `today_seconds/month_seconds`，不会覆盖已有的 `week_seconds/total_seconds`。
+- 旧客户端生成的快捷同步二维码不带 `week/total`，同样只更新今日/本月。
+- 每日重算任务会持续修正旧客户端缺失的周/总数据。
 
 可选地为旧 `devices` 表补索引（已存在则忽略 duplicate key 错误）：
 
@@ -152,6 +188,8 @@ share_scheme=https
 
 - [ ] 数据库已备份
 - [ ] `sessions` 表已创建
+- [ ] `stats.week_seconds` / `stats.total_seconds` 已添加
+- [ ] 已执行一次 `api/recalculate_stats.php` 回填历史数据
 - [ ] `app_secret` 已设置为随机长字符串
 - [ ] `app.debug` 已关闭
 - [ ] `app.base_url` 与 OAuth 回调一致
@@ -159,4 +197,4 @@ share_scheme=https
 - [ ] nginx 只执行 `/api/*.php`
 - [ ] `/api/health.php` 返回 `ok: true`
 - [ ] GitHub 登录、设备绑定、上传、排行榜、分享链接均已验证
-- [ ] cron 已配置
+- [ ] cron 已配置（`cron.php` 与每日 `recalculate_stats.php`）

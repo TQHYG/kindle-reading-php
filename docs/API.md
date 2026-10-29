@@ -82,7 +82,7 @@
     "user": {"id":1,"nickname":"User","avatar":"...","oauth_provider":"github"},
     "csrf": "...",
     "expires_at": "2027-10-29 17:00:00",
-    "stats": {"today_seconds":0,"month_seconds":0,"last_update":"..."},
+    "stats": {"today_seconds":0,"week_seconds":0,"month_seconds":0,"total_seconds":0,"last_update":"..."},
     "oauth_configured": true
   }
 }
@@ -149,7 +149,7 @@
 multipart：
 
 - `logs[]`：`metrics_reader_*`、`history.gz`
-- 可选 query：`today_seconds`、`month_seconds`
+- 可选 query：`today_seconds`、`week_seconds`、`month_seconds`、`total_seconds`
 
 规则：
 
@@ -157,8 +157,9 @@ multipart：
 - `metrics` 最大 5MB，`history.gz` 最大 20MB；
 - 每次最多 100 个文件；
 - 先完整校验，再原子替换用户日志目录；
-- 服务端重新解析日志计算今日/本月秒数，优先使用计算结果；
-- 没有文件时才使用上报的 `today_seconds` / `month_seconds`。
+- 服务端重新解析日志计算今日/本周/本月/总计秒数，优先使用计算结果；
+- 没有文件时才使用上报值；旧客户端只传 `today_seconds` / `month_seconds` 时，仅更新这两个字段，不覆盖已有的周/总数据。
+- 如果上传文件里没有 `history.gz`，`total_seconds` 不会低于数据库中已有值，避免旧客户端只带当前月日志导致总计变小。
 
 响应（兼容旧版）：
 
@@ -169,7 +170,9 @@ multipart：
   "db_synced": true,
   "files_count": 2,
   "today_seconds": 0,
+  "week_seconds": 5400,
   "month_seconds": 154285,
+  "total_seconds": 619200,
   "source": "files"
 }
 ```
@@ -197,10 +200,10 @@ multipart：
 需要会话。
 
 ```json
-{"ok":true,"data":{"today_seconds":1234,"month_seconds":56789,"last_update":"...","devices_count":1}}
+{"ok":true,"data":{"today_seconds":1234,"week_seconds":5400,"month_seconds":56789,"total_seconds":619200,"last_update":"...","devices_count":1}}
 ```
 
-### `GET /api/rank.php?type=today|month&page=1&limit=20`
+### `GET /api/rank.php?type=today|week|month|total&page=1&limit=20`
 
 公开接口。`limit` 最大 50。
 
@@ -224,9 +227,9 @@ multipart：
 
 ### `GET /api/fastsync.php?action=preview&data=<base64>`
 
-需要会话。`data` 为 `{"did":"设备码","today":秒,"month":秒}` 的 Base64。
+需要会话。`data` 为 `{"did":"设备码","today":秒,"week":秒,"month":秒,"total":秒}` 的 Base64。
 
-返回设备名、今日/本月秒数，并校验设备属于当前账号。
+`week` / `total` 可选，兼容旧客户端。返回设备名和各项秒数，并校验设备属于当前账号。
 
 ### `POST /api/fastsync.php?action=confirm`
 

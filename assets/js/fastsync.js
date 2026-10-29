@@ -35,6 +35,12 @@
             document.getElementById('sync-preview').hidden = false;
             document.getElementById('sync-today').textContent = Kykky.formatDuration(data.today_seconds);
             document.getElementById('sync-month').textContent = Kykky.formatDuration(data.month_seconds);
+            document.getElementById('sync-week').textContent = data.week_seconds === null || data.week_seconds === undefined
+                ? '旧版客户端未上传'
+                : Kykky.formatDuration(data.week_seconds);
+            document.getElementById('sync-total').textContent = data.total_seconds === null || data.total_seconds === undefined
+                ? '旧版客户端未上传'
+                : Kykky.formatDuration(data.total_seconds);
             document.getElementById('sync-device').textContent = data.device_name || data.device_code;
 
             const confirmButton = document.getElementById('sync-confirm');
@@ -50,7 +56,9 @@
                     document.getElementById('sync-success').hidden = false;
                     document.getElementById('sync-success-text').textContent =
                         '今日 ' + Kykky.formatDuration(result.data.today_seconds) +
-                        '，本月 ' + Kykky.formatDuration(result.data.month_seconds) + '。';
+                        '，本周 ' + Kykky.formatDuration(result.data.week_seconds) +
+                        '，本月 ' + Kykky.formatDuration(result.data.month_seconds) +
+                        '，总计 ' + Kykky.formatDuration(result.data.total_seconds) + '。';
                 } catch (e) {
                     Kykky.setBusy(confirmButton, false);
                     Kykky.toast(e.message, 'danger');

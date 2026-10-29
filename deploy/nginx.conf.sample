@@ -12,6 +12,11 @@ server {
     charset utf-8;
     client_max_body_size 32m;
 
+    # WAF / 反向代理后避免 Location 带上 nginx 内部监听端口（如 10443）
+    absolute_redirect off;
+    port_in_redirect off;
+    server_name_in_redirect off;
+
     access_log /var/log/nginx/kykky.access.log main;
     error_log  /var/log/nginx/kykky.error.log notice;
 
@@ -28,6 +33,12 @@ server {
 
     # 私有后端文件不可访问
     location ~ ^/api/(lib|sql|config) {
+        deny all;
+        return 404;
+    }
+
+    # 仅允许 CLI 执行的维护脚本
+    location ~ ^/api/(cron|recalculate_stats)\.php$ {
         deny all;
         return 404;
     }

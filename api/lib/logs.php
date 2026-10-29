@@ -17,19 +17,28 @@ function is_gzip_file(string $path): bool
 
 /**
  * @param string[] $paths 已通过校验的日志文件路径
- * @return array{today_seconds:int, month_seconds:int, records:int}
+ * @return array{today_seconds:int, week_seconds:int, month_seconds:int, total_seconds:int, records:int}
  */
 function metrics_compute_stats(array $paths): array
 {
     $tz = new DateTimeZone((string)kykky_cfg('app.timezone', 'Asia/Shanghai'));
     $now = new DateTimeImmutable('now', $tz);
-    $todayStart = $now->setTime(0, 0, 0)->getTimestamp();
-    $todayEnd = $now->setTime(0, 0, 0)->modify('+1 day')->getTimestamp();
+    $midnight = $now->setTime(0, 0, 0);
+    $todayStart = $midnight->getTimestamp();
+    $todayEnd = $midnight->modify('+1 day')->getTimestamp();
+
+    // 周一为一周起点。N: 1=周一 ... 7=周日
+    $weekday = (int)$now->format('N');
+    $weekStart = $midnight->modify('-' . ($weekday - 1) . ' days')->getTimestamp();
+    $weekEnd = $midnight->modify('+' . (8 - $weekday) . ' days')->getTimestamp();
+
     $monthStart = $now->modify('first day of this month')->setTime(0, 0, 0)->getTimestamp();
     $monthEnd = $now->modify('first day of next month')->setTime(0, 0, 0)->getTimestamp();
 
     $todaySeconds = 0;
+    $weekSeconds = 0;
     $monthSeconds = 0;
+    $totalSeconds = 0;
     $records = 0;
     $pattern = '/metric_generic,(\d+),.*,com\.lab126\.booklet\.reader\.activeDuration,(\d+)/';
 
@@ -56,9 +65,15 @@ function metrics_compute_stats(array $paths): array
             }
             $start = $end - $duration;
 
+            $totalSeconds += $duration;
+
             $todayOverlap = min($end, $todayEnd) - max($start, $todayStart);
             if ($todayOverlap > 0) {
                 $todaySeconds += $todayOverlap;
+            }
+            $weekOverlap = min($end, $weekEnd) - max($start, $weekStart);
+            if ($weekOverlap > 0) {
+                $weekSeconds += $weekOverlap;
             }
             $monthOverlap = min($end, $monthEnd) - max($start, $monthStart);
             if ($monthOverlap > 0) {
@@ -76,7 +91,9 @@ function metrics_compute_stats(array $paths): array
 
     return [
         'today_seconds' => $todaySeconds,
+        'week_seconds' => $weekSeconds,
         'month_seconds' => $monthSeconds,
+        'total_seconds' => $totalSeconds,
         'records' => $records,
     ];
 }

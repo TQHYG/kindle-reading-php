@@ -50,15 +50,21 @@
                 body: formData
             });
             const today = Kykky.formatDuration(payload.today_seconds || 0);
+            const week = Kykky.formatDuration(payload.week_seconds || 0);
             const month = Kykky.formatDuration(payload.month_seconds || 0);
+            const total = Kykky.formatDuration(payload.total_seconds || 0);
             resultBox.hidden = false;
             resultBox.innerHTML =
                 '<div class="alert alert-success">' +
                 '<h5 class="alert-heading"><i class="fa-solid fa-circle-check me-1"></i> 同步成功</h5>' +
                 '<div class="data-row"><span class="data-label">今日阅读</span><span class="data-value">' +
                 Kykky.escapeHtml(today) + '</span></div>' +
+                '<div class="data-row"><span class="data-label">本周阅读</span><span class="data-value">' +
+                Kykky.escapeHtml(week) + '</span></div>' +
                 '<div class="data-row"><span class="data-label">本月累计</span><span class="data-value">' +
                 Kykky.escapeHtml(month) + '</span></div>' +
+                '<div class="data-row"><span class="data-label">总计阅读</span><span class="data-value">' +
+                Kykky.escapeHtml(total) + '</span></div>' +
                 '<div class="data-row"><span class="data-label">文件数量</span><span class="data-value">' +
                 Number(payload.files_count || 0) + '</span></div>' +
                 '<div class="mt-3 d-flex gap-2 flex-wrap">' +

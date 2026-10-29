@@ -2,8 +2,11 @@
 /**
  * 无网络时扫码快捷同步。
  *
- * GET  /api/fastsync.php?data=<base64>
+ * GET  /api/fastsync.php?action=preview&data=<base64>
  * POST /api/fastsync.php?action=confirm   {data}  (X-CSRF-Token)
+ *
+ * data: {"did":"设备码","today":秒,"month":秒,"week":秒,"total":秒}
+ * week/total 可选，兼容旧客户端。
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -31,11 +34,41 @@ function decode_fastsync_data(mixed $raw): array
     if (!is_numeric($data['today']) || !is_numeric($data['month'])) {
         api_error('invalid_data', '阅读数据格式不正确', 400);
     }
-    return [
+
+    $result = [
         'did' => $data['did'],
         'today' => max(0, (int)$data['today']),
         'month' => max(0, (int)$data['month']),
+        'week' => null,
+        'total' => null,
     ];
+    foreach (['week', 'total'] as $key) {
+        if (array_key_exists($key, $data)) {
+            if (!is_numeric($data[$key])) {
+                api_error('invalid_data', '阅读数据格式不正确', 400);
+            }
+            $result[$key] = max(0, (int)$data[$key]);
+        }
+    }
+    return $result;
+}
+
+function fastsync_fields(array $data): array
+{
+    $fields = [
+        'today_seconds' => $data['today'],
+        'month_seconds' => $data['month'],
+    ];
+    if ($data['week'] !== null) {
+        $fields['week_seconds'] = $data['week'];
+    }
+    if ($data['total'] !== null) {
+        $fields['total_seconds'] = $data['total'];
+    }
+    if (!stats_validate_fields($fields)) {
+        api_error('invalid_stats', '阅读数据超出合理范围', 400);
+    }
+    return $fields;
 }
 
 function assert_device_owner(string $deviceCode, int $userId): array
@@ -58,14 +91,14 @@ if ($action === 'preview') {
     api_require_method('GET');
     $data = decode_fastsync_data($_GET['data'] ?? null);
     $device = assert_device_owner($data['did'], $userId);
-    if (!stats_validate_values($data['today'], $data['month'])) {
-        api_error('invalid_stats', '阅读数据超出合理范围', 400);
-    }
+    fastsync_fields($data);
     api_ok([
         'device_name' => (string)($device['device_name'] ?? ''),
         'device_code' => $data['did'],
         'today_seconds' => $data['today'],
+        'week_seconds' => $data['week'],
         'month_seconds' => $data['month'],
+        'total_seconds' => $data['total'],
     ]);
 }
 
@@ -75,13 +108,14 @@ if ($action === 'confirm') {
     $input = request_data();
     $data = decode_fastsync_data($input['data'] ?? null);
     assert_device_owner($data['did'], $userId);
-    if (!stats_validate_values($data['today'], $data['month'])) {
-        api_error('invalid_stats', '阅读数据超出合理范围', 400);
-    }
-    stats_upsert($userId, $data['today'], $data['month']);
+    $fields = fastsync_fields($data);
+    stats_upsert_fields($userId, $fields);
+    $actual = stats_for_user($userId);
     api_ok([
-        'today_seconds' => $data['today'],
-        'month_seconds' => $data['month'],
+        'today_seconds' => (int)$actual['today_seconds'],
+        'week_seconds' => (int)$actual['week_seconds'],
+        'month_seconds' => (int)$actual['month_seconds'],
+        'total_seconds' => (int)$actual['total_seconds'],
         'device_name' => (string)(db_val(
             'SELECT device_name FROM devices WHERE code = ? AND user_id = ?',
             [$data['did'], $userId],

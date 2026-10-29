@@ -2,9 +2,11 @@
 /**
  * Kindle / Web 日志上传与统计同步。
  *
- * POST /api/upload.php?today_seconds=..&month_seconds=..
+ * POST /api/upload.php?today_seconds=..&week_seconds=..&month_seconds=..&total_seconds=..
  * multipart: logs[]（metrics_reader_* 与 history.gz）
  * 认证：Kindle Bearer Token 或 Web 会话（Web 写操作需要 X-CSRF-Token）。
+ *
+ * 兼容：旧客户端只传 today_seconds/month_seconds 时，不会覆盖 week/total。
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -22,49 +24,74 @@ try {
     }
 
     $validated = [];
+    $hasHistory = false;
     foreach ($files as $file) {
         validate_uploaded_log($file);
+        if ($file['name'] === 'history.gz') {
+            $hasHistory = true;
+        }
         $validated[] = $file;
     }
 
     if ($validated !== []) {
+        // 服务端重新解析日志，计算今日/本周/本月/总计。
         $tmpPaths = array_map(static fn(array $f): string => (string)$f['tmp_name'], $validated);
         $computed = metrics_compute_stats($tmpPaths);
-        $todaySeconds = (int)$computed['today_seconds'];
-        $monthSeconds = (int)$computed['month_seconds'];
-        if (!stats_validate_values($todaySeconds, $monthSeconds)) {
+        $fields = [
+            'today_seconds' => (int)$computed['today_seconds'],
+            'week_seconds' => (int)$computed['week_seconds'],
+            'month_seconds' => (int)$computed['month_seconds'],
+            'total_seconds' => (int)$computed['total_seconds'],
+        ];
+        // 旧客户端可能只上传当前月日志而没有 history.gz。
+        // 为避免把历史总计算低，在这种情况下总计至少保持原值。
+        if (!$hasHistory) {
+            $existing = stats_for_user($userId);
+            $fields['total_seconds'] = max(
+                $fields['total_seconds'],
+                (int)$existing['total_seconds'],
+                $fields['month_seconds']
+            );
+        }
+        if (!stats_validate_fields($fields)) {
             legacy_response(['status' => 'error', 'msg' => '阅读数据校验未通过'], 400);
         }
         $fileCount = commit_uploaded_files($userId, $validated);
+        stats_upsert_fields($userId, $fields);
         $source = 'files';
     } else {
-        $todayRaw = $_GET['today_seconds'] ?? ($_POST['today_seconds'] ?? null);
-        $monthRaw = $_GET['month_seconds'] ?? ($_POST['month_seconds'] ?? null);
-        if ($todayRaw === null || $monthRaw === null) {
+        // 无文件：兼容旧客户端只上报今日/本月；新客户端可附带本周/总计。
+        $fields = [];
+        foreach (['today_seconds', 'week_seconds', 'month_seconds', 'total_seconds'] as $key) {
+            $raw = $_GET[$key] ?? ($_POST[$key] ?? null);
+            if ($raw !== null) {
+                if (!is_numeric($raw)) {
+                    legacy_response(['status' => 'error', 'msg' => '统计数据格式不正确'], 400);
+                }
+                $fields[$key] = max(0, (int)$raw);
+            }
+        }
+        if (!isset($fields['today_seconds'], $fields['month_seconds'])) {
             legacy_response(['status' => 'error', 'msg' => '缺少日志文件或统计数据'], 400);
         }
-        if (!is_numeric($todayRaw) || !is_numeric($monthRaw)) {
-            legacy_response(['status' => 'error', 'msg' => '统计数据格式不正确'], 400);
+        if (!stats_validate_fields($fields)) {
+            legacy_response(['status' => 'error', 'msg' => '阅读数据校验未通过'], 400);
         }
-        $todaySeconds = max(0, (int)$todayRaw);
-        $monthSeconds = max(0, (int)$monthRaw);
+        stats_upsert_fields($userId, $fields);
         $fileCount = 0;
         $source = 'reported';
     }
 
-    if (!stats_validate_values($todaySeconds, $monthSeconds)) {
-        legacy_response(['status' => 'error', 'msg' => '阅读数据校验未通过'], 400);
-    }
-
-    stats_upsert($userId, $todaySeconds, $monthSeconds);
-
+    $actual = stats_for_user($userId);
     legacy_response([
         'status' => 'success',
         'msg' => 'Sync completed',
         'db_synced' => true,
         'files_count' => $fileCount,
-        'today_seconds' => $todaySeconds,
-        'month_seconds' => $monthSeconds,
+        'today_seconds' => (int)$actual['today_seconds'],
+        'week_seconds' => (int)$actual['week_seconds'],
+        'month_seconds' => (int)$actual['month_seconds'],
+        'total_seconds' => (int)$actual['total_seconds'],
         'source' => $source,
     ]);
 } catch (InvalidArgumentException $e) {

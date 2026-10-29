@@ -8,7 +8,8 @@ Kykky 的服务端与 Web 前端，配合 Kindle 客户端 [TQHYG/kykky](https:/
 - **API 后端**：所有 PHP 代码位于 `api/`，不再从静态页面直接渲染数据。
 - **持久登录**：Web 登录使用数据库会话 + HttpOnly Cookie，默认有效期一年，临近过期自动续期，不再依赖易丢失的 PHP `session` 文件。
 - **Kindle 兼容**：`/api/auth.php`、`/api/upload.php` 保持旧客户端字段兼容；设备 Token 仍使用 HMAC 签名。
-- **数据库**：沿用原 `users` / `stats` / `devices` 结构，仅新增 `sessions` 表。
+- **数据库**：沿用原 `users` / `devices` 结构；`stats` 新增 `week_seconds`、`total_seconds`，并新增 `sessions` 表。
+- **排行榜**：支持日榜、周榜、月榜、总榜。
 
 ```
 kindle-reading-php/
@@ -32,7 +33,8 @@ kindle-reading-php/
 │   ├── stats.php                      # 当前用户统计
 │   ├── fastsync.php                   # 扫码快捷同步
 │   ├── health.php                     # 健康检查
-│   └── cron.php                       # CLI 定时任务
+│   ├── cron.php                       # CLI 定时任务（清理/清零）
+│   └── recalculate_stats.php          # 每日按日志重算周/月/总计
 ├── deploy/                            # nginx / php-fpm 示例
 └── docs/                              # 迁移与 API 文档
 ```
@@ -54,7 +56,7 @@ mysql -uroot -p -e "GRANT SELECT,INSERT,UPDATE,DELETE ON kykky_db.* TO 'kykky'@'
 mysql -uroot -p kykky_db < api/sql/schema.sql
 ```
 
-已有旧库请参考 [docs/MIGRATION.md](docs/MIGRATION.md)，只新增 `sessions` 表。
+已有旧库请参考 [docs/MIGRATION.md](docs/MIGRATION.md)，依次执行 v2 `sessions` 迁移和 v3 `week/total` 迁移。
 
 ### 3. 配置
 
@@ -92,13 +94,26 @@ sudo chown -R www-data:www-data /var/lib/kykky   # Fedora 用 apache
 
 前端依赖已全部本地化到 `assets/vendor/`，运行时不依赖公共 CDN。
 
+如果 nginx 位于 WAF / 反向代理之后，建议在 `http` 或 `server` 块增加：
+
+```nginx
+absolute_redirect off;
+port_in_redirect off;
+server_name_in_redirect off;
+```
+
+否则 `return 302 /share.html` 可能被拼成带内部监听端口（如 `:10443`）的绝对地址。详细说明见 [docs/NGINX.md](docs/NGINX.md)。
+
 ### 5. 定时任务
 
 ```cron
 * * * * * php /path/to/kindle-reading-php/api/cron.php >> /var/log/kykky-cron.log 2>&1
+30 0 * * * php /path/to/kindle-reading-php/api/recalculate_stats.php >> /var/log/kykky-recalculate.log 2>&1
 ```
 
-任务包括：清理过期待绑定设备、清理过期会话、每日/每月清零排行榜统计。
+- `cron.php`：清理过期待绑定设备、清理过期会话、每日/每月清零排行榜统计。
+- `recalculate_stats.php`：每天凌晨根据用户已上传的日志重算今日/本周/本月/总计，回填旧客户端缺失的周/总数据。
+- 如需只重算单个用户：`php api/recalculate_stats.php --user=123`。
 
 ## Web 登录与会话
 
@@ -118,7 +133,8 @@ Cookie 在 HTTPS 下自动加 `Secure`，本地 HTTP 调试时自动关闭。
 - `GET /api/auth.php?action=get_url`
 - `GET /api/auth.php?action=check_status&device_code=...`
 - `GET /api/auth.php?action=logout`（Bearer Token）
-- `POST /api/upload.php?today_seconds=..&month_seconds=..`，multipart `logs[]`
+- `POST /api/upload.php?today_seconds=..&week_seconds=..&month_seconds=..&total_seconds=..`，multipart `logs[]`
+  - 旧客户端只传 `today_seconds/month_seconds` 仍可用；服务端会从上传日志计算缺失的周/总数据。
 
 服务端会重新解析上传的 `metrics_reader_*` / `history.gz` 计算今日和本月时长，优先使用计算结果，避免客户端统计偏差。
 

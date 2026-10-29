@@ -1,7 +1,9 @@
 (function () {
     'use strict';
 
-    const type = Kykky.queryParam('type', 'today') === 'month' ? 'month' : 'today';
+    const allowedTypes = ['today', 'week', 'month', 'total'];
+    const requestedType = Kykky.queryParam('type', 'today');
+    const type = allowedTypes.includes(requestedType) ? requestedType : 'today';
     let currentPage = 1;
     let loading = false;
     let isEnd = false;

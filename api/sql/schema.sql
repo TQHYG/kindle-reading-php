@@ -15,11 +15,15 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS stats (
     user_id INT UNSIGNED NOT NULL,
     today_seconds INT UNSIGNED NOT NULL DEFAULT 0,
+    week_seconds INT UNSIGNED NOT NULL DEFAULT 0,
     month_seconds INT UNSIGNED NOT NULL DEFAULT 0,
+    total_seconds INT UNSIGNED NOT NULL DEFAULT 0,
     last_update DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id),
     KEY idx_stats_today (today_seconds),
-    KEY idx_stats_month (month_seconds)
+    KEY idx_stats_week (week_seconds),
+    KEY idx_stats_month (month_seconds),
+    KEY idx_stats_total (total_seconds)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS devices (

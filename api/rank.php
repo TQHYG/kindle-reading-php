@@ -2,17 +2,24 @@
 /**
  * 阅读排行榜。
  *
- * GET /api/rank.php?type=today|month&page=1
+ * GET /api/rank.php?type=today|week|month|total&page=1
  */
 
 require_once __DIR__ . '/bootstrap.php';
 
-$type = ($_GET['type'] ?? 'today') === 'month' ? 'month' : 'today';
+$typeMap = [
+    'today' => 'today_seconds',
+    'week' => 'week_seconds',
+    'month' => 'month_seconds',
+    'total' => 'total_seconds',
+];
+$requestedType = $_GET['type'] ?? 'today';
+$type = is_string($requestedType) && array_key_exists($requestedType, $typeMap) ? $requestedType : 'today';
 $page = max(1, min(1000, (int)($_GET['page'] ?? 1)));
 $limit = max(1, min(50, (int)($_GET['limit'] ?? 20)));
 $offset = ($page - 1) * $limit;
 
-$field = $type === 'month' ? 'month_seconds' : 'today_seconds';
+$field = $typeMap[$type];
 
 $rows = db_all(
     "SELECT s.user_id, s.{$field} AS seconds, u.nickname, u.avatar

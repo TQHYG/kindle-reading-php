@@ -25,7 +25,9 @@
 
     function renderStats(stats) {
         document.getElementById('stat-today').textContent = Kykky.formatDuration(stats.today_seconds);
+        document.getElementById('stat-week').textContent = Kykky.formatDuration(stats.week_seconds || 0);
         document.getElementById('stat-month').textContent = Kykky.formatDuration(stats.month_seconds);
+        document.getElementById('stat-total').textContent = Kykky.formatDuration(stats.total_seconds || 0);
     }
 
     function renderDevices(devices) {
