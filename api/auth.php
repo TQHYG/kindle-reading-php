@@ -1,106 +1,71 @@
 <?php
-// api/auth.php
+/**
+ * Kindle 设备授权接口（兼容旧客户端路径与字段）。
+ *
+ * GET /api/auth.php?action=get_url
+ * GET /api/auth.php?action=check_status&device_code=...
+ * GET /api/auth.php?action=logout   (Authorization: Bearer <token>)
+ */
 
-require_once __DIR__ . '/../func/db.php';
-require_once __DIR__ . '/../func/auth_tools.php';
+require_once __DIR__ . '/bootstrap.php';
 
-// 强制所有返回都是 JSON
-header('Content-Type: application/json; charset=utf-8');
+$action = $_GET['action'] ?? '';
 
-try {
-    $action = $_GET['action'] ?? '';
+if ($action === 'get_url') {
+    $limit = max(1, (int)kykky_cfg('limits.device_pending_per_minute', 10));
+    $recent = (int)db_val(
+        'SELECT COUNT(*) FROM devices
+         WHERE status = 0 AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)',
+        [],
+        0
+    );
+    if ($recent >= $limit) {
+        legacy_response(['error' => 'Too many requests. Please try again later.'], 429);
+    }
 
-    // ==========================================
-    // 1. 获取绑定设备 URL
-    // ==========================================
-    if ($action === 'get_url') {
-        $ip = $_SERVER['REMOTE_ADDR'];
-    
-        // 简单的频率限制
-        $recent_count = db_query(
-            "SELECT COUNT(*) as cnt FROM devices WHERE status = 0 AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)", 
-            []
-        )[0]['cnt'];
+    $deviceCode = bin2hex(random_bytes(8));
+    db_query('INSERT INTO devices (code, status) VALUES (?, 0)', [$deviceCode]);
 
-        if ($recent_count > 10) { // 全局限制
-            api_response(['error' => 'Too many requests. Please try again later.'], 429);
+    legacy_response([
+        'device_code' => $deviceCode,
+        'login_url' => kykky_base_url() . '/device.html?device_code=' . rawurlencode($deviceCode),
+    ]);
+}
+
+if ($action === 'check_status') {
+    $code = $_GET['device_code'] ?? '';
+    if (!is_string($code) || $code === '') {
+        legacy_response(['status' => 'error', 'msg' => 'missing_code'], 400);
+    }
+
+    $device = db_one('SELECT * FROM devices WHERE code = ? LIMIT 1', [$code]);
+    if ($device === null) {
+        legacy_response(['status' => 'expired'], 404);
+    }
+
+    if ((int)$device['status'] === 1) {
+        $user = db_one('SELECT nickname, avatar FROM users WHERE id = ? LIMIT 1', [(int)$device['user_id']]);
+        if ($user === null) {
+            db_query('DELETE FROM devices WHERE code = ?', [$code]);
+            legacy_response(['status' => 'expired'], 404);
         }
-        $device_code = bin2hex(random_bytes(8));
-        // status 0:等待, 1:成功
-        db_query("INSERT INTO devices (code, status) VALUES (?, 0)", [$device_code]);
-        
-        $login_url = "https://" . $_SERVER['HTTP_HOST'] . "/device.php?device_code=" . $device_code;
-        
-        api_response([
-            'device_code' => $device_code,
-            'login_url'   => $login_url
+
+        legacy_response([
+            'status' => 'success',
+            'access_token' => issue_device_token((int)$device['user_id'], $code),
+            'nickname' => (string)$user['nickname'],
+            'avatar' => (string)$user['avatar'],
+            'device_name' => (string)($device['device_name'] ?? ''),
         ]);
     }
 
-    // ==========================================
-    // 2. 轮询状态
-    // ==========================================
-    if ($action === 'check_status') {
-        $code = $_GET['device_code'] ?? '';
-        
-        if (empty($code)) {
-            api_response(['status' => 'error', 'msg' => 'missing_code'], 400);
-        }
-
-        // 查询数据库
-        $rows = db_query("SELECT * FROM devices WHERE code = ?", [$code]);
-        $row = $rows[0] ?? null;
-        
-        // 情况 A: 码不存在或已过期 (被删除)
-        if (!$row) {
-            api_response(['status' => 'expired'], 404);
-        }
-        
-        // 情况 B: 已成功 (Status = 1)
-        // 注意：数据库取出的可能是字符串 "1"，用 == 宽松比较
-        if ($row['status'] == 1) {
-            $user_id = $row['user_id'];
-            $device_name = $row['device_name'];
-            
-            // 生成 Token
-            $token = generate_token($row['user_id'], $row['code']);
-            
-            // 获取用户昵称用于显示
-            $u_rows = db_query("SELECT nickname, avatar FROM users WHERE id = ?", [$user_id]);
-            $user_info = $u_rows[0] ?? ['nickname' => 'User', 'avatar' => ''];
-            
-            api_response([
-                'status'       => 'success',
-                'access_token' => $token,
-                'nickname'     => $user_info['nickname'],
-                'avatar'       => $user_info['avatar'],
-                'device_name'  => $device_name
-            ]);
-        } 
-        // 情况 C: 等待中 (Status = 0)
-        else {
-            api_response(['status' => 'pending']);
-        }
-    }
-
-    // ==========================================
-    // 3. 设备登出 (吊销)
-    // ==========================================
-    if ($action === 'logout') {
-        // 校验 Token 有效性并获取 payload
-        $auth = require_auth(); 
-        $device_code = $auth['did']; 
-
-        // 从数据库中删除该设备记录，实现吊销
-        db_query("DELETE FROM devices WHERE code = ?", [$device_code]);
-
-        api_response(['status' => 'success', 'msg' => 'Device logged out and token revoked']);
-    }
-
-    // 未知动作
-    api_response(['status' => 'error', 'msg' => 'invalid_action'], 400);
-
-} catch (Exception $e) {
-    // 捕获所有致命错误并以 JSON 返回
-    api_response(['status' => 'error', 'msg' => $e->getMessage()], 500);
+    legacy_response(['status' => 'pending']);
 }
+
+if ($action === 'logout') {
+    $auth = require_device_auth();
+    db_query('DELETE FROM devices WHERE code = ? AND user_id = ?', [$auth['did'], $auth['uid']]);
+    legacy_response(['status' => 'success', 'msg' => 'Device logged out and token revoked']);
+}
+
+legacy_response(['status' => 'error', 'msg' => 'invalid_action'], 400);

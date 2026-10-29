@@ -1,0 +1,3 @@
+# /etc/cron.d/kykky
+# 每分钟执行：清理 pending 设备/过期会话，并在 00:00-00:10 清零日/月统计
+* * * * * www-data php /var/www/kindle-reading-php/api/cron.php >> /var/log/kykky-cron.log 2>&1

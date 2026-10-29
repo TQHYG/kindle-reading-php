@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读排行榜 - Kykky 阅读数据统计</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+<div id="site-nav"></div>
+
+<main class="container py-4">
+    <ul class="nav nav-pills justify-content-center mb-4">
+        <li class="nav-item">
+            <a class="nav-link" id="tab-today" href="/rank.html?type=today">
+                <i class="fa-solid fa-calendar-day me-1"></i> 日榜
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab-month" href="/rank.html?type=month">
+                <i class="fa-solid fa-calendar-days me-1"></i> 月榜
+            </a>
+        </li>
+    </ul>
+
+    <div id="my-rank-container"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="rank-list" id="rank-content">
+                <div class="text-center text-secondary py-5">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-4">
+        <button id="load-more" class="btn btn-outline-primary" style="min-width: 200px;">加载中...</button>
+    </div>
+</main>
+
+<footer class="text-center py-4 text-secondary small">
+    &copy; <span id="year"></span> Kykky Project. TQHYG.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/rank.js"></script>
+</body>
+</html>

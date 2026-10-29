@@ -1,102 +1,86 @@
 <?php
-// api/files.php - 用户文件服务 API
-require_once __DIR__ . '/../func/common.php';
+/**
+ * 用户日志文件 API（Web 会话认证）。
+ *
+ * GET /api/files.php?action=list
+ * GET /api/files.php?action=download&file=metrics_reader_2610
+ * GET /api/files.php?action=download_backup
+ */
 
-$user = get_current_user_info();
-if (!$user) {
-    header('Content-Type: application/json; charset=utf-8');
-    http_response_code(401);
-    echo json_encode(['status' => 'error', 'msg' => '未登录']);
-    exit;
+require_once __DIR__ . '/bootstrap.php';
+
+$session = current_session();
+if ($session === null) {
+    legacy_response(['status' => 'error', 'msg' => '未登录'], 401);
 }
-
-$uid = $user['id'];
-$storage_path = __DIR__ . "/../storage/{$uid}";
+$userId = (int)$session['user']['id'];
 $action = $_GET['action'] ?? '';
 
-// ========== 1. 列出用户的日志文件 ==========
 if ($action === 'list') {
-    $files = [];
-    if (is_dir($storage_path)) {
-        foreach (glob("$storage_path/*") as $file) {
-            $name = basename($file);
-            // 白名单校验文件名
-            if (preg_match('/^metrics_reader_\d+$/', $name) || $name === 'history.gz') {
-                $files[] = ['name' => $name, 'size' => filesize($file)];
-            }
-        }
-    }
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['status' => 'success', 'files' => $files]);
-    exit;
+    legacy_response([
+        'status' => 'success',
+        'files' => storage_list_files($userId),
+    ]);
 }
 
-// ========== 2. 下载单个日志文件 ==========
 if ($action === 'download') {
-    $filename = basename($_GET['file'] ?? '');
-
-    // 白名单校验文件名，防止路径穿越
-    if (!preg_match('/^metrics_reader_\d+$/', $filename) && $filename !== 'history.gz') {
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'msg' => '非法文件名']);
-        exit;
+    $name = $_GET['file'] ?? '';
+    if (!is_string($name)) {
+        legacy_response(['status' => 'error', 'msg' => '非法文件名'], 400);
     }
-
-    $filepath = "$storage_path/$filename";
-    if (!file_exists($filepath)) {
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(404);
-        echo json_encode(['status' => 'error', 'msg' => '文件不存在']);
-        exit;
+    try {
+        $path = storage_file_path($userId, $name);
+    } catch (InvalidArgumentException $e) {
+        legacy_response(['status' => 'error', 'msg' => $e->getMessage()], 400);
+    } catch (RuntimeException $e) {
+        legacy_response(['status' => 'error', 'msg' => $e->getMessage()], 404);
     }
 
     header('Content-Type: application/octet-stream');
-    header('Content-Length: ' . filesize($filepath));
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    readfile($filepath);
+    header('Content-Length: ' . filesize($path));
+    header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+    header('Cache-Control: no-store');
+    header('X-Content-Type-Options: nosniff');
+    readfile($path);
     exit;
 }
 
-// ========== 3. 打包下载备份 (ZIP) ==========
 if ($action === 'download_backup') {
-    if (!is_dir($storage_path)) {
-        http_response_code(404);
-        die("暂无备份数据。");
+    $files = storage_list_files($userId);
+    if ($files === []) {
+        legacy_response(['status' => 'error', 'msg' => '暂无可备份的日志文件'], 404);
+    }
+    if (!class_exists('ZipArchive')) {
+        legacy_response(['status' => 'error', 'msg' => '服务器未安装 PHP zip 扩展'], 500);
     }
 
-    $zip_name = "kindle_backup_user_{$uid}_" . date('Ymd') . ".zip";
-    $zip_file = tempnam(sys_get_temp_dir(), 'zip');
+    $zipPath = tempnam(sys_get_temp_dir(), 'kykky_zip_');
+    if ($zipPath === false) {
+        legacy_response(['status' => 'error', 'msg' => '无法创建临时备份文件'], 500);
+    }
 
     $zip = new ZipArchive();
-    if ($zip->open($zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-        $files = glob($storage_path . "/*");
-        $has_files = false;
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                $zip->addFile($file, basename($file));
-                $has_files = true;
-            }
-        }
-        $zip->close();
-
-        if (!$has_files) {
-            unlink($zip_file);
-            die("文件夹内没有可备份的文件。");
-        }
-
-        header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename="' . $zip_name . '"');
-        header('Content-Length: ' . filesize($zip_file));
-        readfile($zip_file);
-        unlink($zip_file);
-        exit;
-    } else {
-        die("备份生成失败，请联系管理员。");
+    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        @unlink($zipPath);
+        legacy_response(['status' => 'error', 'msg' => '无法创建备份压缩包'], 500);
     }
+
+    foreach ($files as $file) {
+        $path = storage_user_dir($userId) . '/' . $file['name'];
+        if (is_file($path)) {
+            $zip->addFile($path, $file['name']);
+        }
+    }
+    $zip->close();
+
+    $downloadName = 'kindle_backup_user_' . $userId . '_' . date('Ymd') . '.zip';
+    header('Content-Type: application/zip');
+    header('Content-Length: ' . filesize($zipPath));
+    header('Content-Disposition: attachment; filename="' . $downloadName . '"');
+    header('Cache-Control: no-store');
+    readfile($zipPath);
+    @unlink($zipPath);
+    exit;
 }
 
-// 无效 action
-header('Content-Type: application/json; charset=utf-8');
-http_response_code(400);
-echo json_encode(['status' => 'error', 'msg' => 'invalid_action']);
+legacy_response(['status' => 'error', 'msg' => 'invalid_action'], 400);

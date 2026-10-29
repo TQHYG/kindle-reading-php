@@ -1,106 +1,75 @@
 <?php
-// api/upload.php
+/**
+ * Kindle / Web 日志上传与统计同步。
+ *
+ * POST /api/upload.php?today_seconds=..&month_seconds=..
+ * multipart: logs[]（metrics_reader_* 与 history.gz）
+ * 认证：Kindle Bearer Token 或 Web 会话（Web 写操作需要 X-CSRF-Token）。
+ */
 
-require_once __DIR__ . '/../func/common.php';
+require_once __DIR__ . '/bootstrap.php';
 
-// 1. 身份校验
-$auth = require_auth();
-$uid = $auth['uid'];
+api_require_method('POST');
 
-// 2. 参数获取
-$today_sec = isset($_GET['today_seconds']) ? (int)$_GET['today_seconds'] : null;
-$month_sec = isset($_GET['month_seconds']) ? (int)$_GET['month_seconds'] : null;
+try {
+    $auth = require_token_or_session();
+    $userId = (int)$auth['uid'];
 
-// 定义存储路径
-$user_dir = __DIR__ . "/../storage/{$uid}";
-if (!is_dir($user_dir)) mkdir($user_dir, 0755, true);
-
-// ==========================================
-// 逻辑 A: 处理文件上传
-// ==========================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['logs'])) {
-    $files = $_FILES['logs'];
-    $verified_uploads = [];
-
-    // 第一步：严格校验所有上传的文件
-    foreach ($files['name'] as $key => $name) {
-        $filename = basename($name);
-        $tmp_path = $files['tmp_name'][$key];
-        $file_size = $files['size'][$key];
-
-        // 1.1 文件名白名单校验 (使用正则适配 metrics_reader_2501 等格式)
-        $is_metrics = preg_match('/^metrics_reader_\d+$/', $filename);
-        $is_history = ($filename === 'history.gz');
-
-        if (!$is_metrics && !$is_history) {
-            api_response(['status' => 'error', 'msg' => "非法文件名: $filename"], 403);
-        }
-
-        // 1.2 文件大小校验 (metrics 5MB, history 20MB)
-        $max_size = $is_history ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
-        if ($file_size > $max_size) {
-            api_response(['status' => 'error', 'msg' => "文件 $filename 过大"], 413);
-        }
-
-        // 1.3 内容合法性抽样检查
-        if ($is_metrics) {
-            $handle = fopen($tmp_path, 'r');
-            $sample = fread($handle, 4096);
-            fclose($handle);
-            // 检查是否包含关键的 activeDuration 字符串
-            if (!strpos($sample, 'com.lab126.booklet.reader.activeDuration')) {
-                api_response(['status' => 'error', 'msg' => "文件 $filename 格式不正确"], 400);
-            }
-        } elseif ($is_history) {
-            $handle = fopen($tmp_path, 'r');
-            $header = fread($handle, 2);
-            fclose($handle);
-            if ($header !== "\x1f\x8b") { // Gzip 魔数校验
-                api_response(['status' => 'error', 'msg' => "history.gz 不是有效的 Gzip 文件"], 400);
-            }
-        }
-
-        // 记录校验通过的文件信息
-        $verified_uploads[] = [
-            'tmp'  => $tmp_path,
-            'dest' => "{$user_dir}/{$filename}"
-        ];
+    $files = normalize_uploaded_files('logs');
+    $maxFiles = max(1, (int)kykky_cfg('limits.max_files_per_upload', 100));
+    if (count($files) > $maxFiles) {
+        legacy_response(['status' => 'error', 'msg' => '一次上传的文件数量过多'], 413);
     }
 
-    // 第二步：原子性操作 - 只有全部校验通过才清空并写入
-    if (!empty($verified_uploads)) {
-        // 清空该用户目录下的旧日志文件
-        array_map('unlink', glob("$user_dir/*"));
-
-        // 写入新文件
-        foreach ($verified_uploads as $upload) {
-            if (!move_uploaded_file($upload['tmp'], $upload['dest'])) {
-                api_response(['status' => 'error', 'msg' => "物理文件保存失败"], 500);
-            }
-        }
+    $validated = [];
+    foreach ($files as $file) {
+        validate_uploaded_log($file);
+        $validated[] = $file;
     }
-}
 
-// ==========================================
-// 逻辑 B: 数据统计同步
-// ==========================================
-$db_updated = false;
-if ($today_sec !== null && $month_sec !== null) {
-    // 调用已有函数 update_user_stats($user_id, $today_sec, $month_sec)
-    if (update_user_stats($uid, $today_sec, $month_sec)) {
-        $db_updated = true;
+    if ($validated !== []) {
+        $tmpPaths = array_map(static fn(array $f): string => (string)$f['tmp_name'], $validated);
+        $computed = metrics_compute_stats($tmpPaths);
+        $todaySeconds = (int)$computed['today_seconds'];
+        $monthSeconds = (int)$computed['month_seconds'];
+        if (!stats_validate_values($todaySeconds, $monthSeconds)) {
+            legacy_response(['status' => 'error', 'msg' => '阅读数据校验未通过'], 400);
+        }
+        $fileCount = commit_uploaded_files($userId, $validated);
+        $source = 'files';
     } else {
-        // 如果数值超出逻辑范围（例如单日超过 24 小时），该函数会返回 false
-        api_response(['status' => 'error', 'msg' => '阅读数据校验未通过'], 400);
+        $todayRaw = $_GET['today_seconds'] ?? ($_POST['today_seconds'] ?? null);
+        $monthRaw = $_GET['month_seconds'] ?? ($_POST['month_seconds'] ?? null);
+        if ($todayRaw === null || $monthRaw === null) {
+            legacy_response(['status' => 'error', 'msg' => '缺少日志文件或统计数据'], 400);
+        }
+        if (!is_numeric($todayRaw) || !is_numeric($monthRaw)) {
+            legacy_response(['status' => 'error', 'msg' => '统计数据格式不正确'], 400);
+        }
+        $todaySeconds = max(0, (int)$todayRaw);
+        $monthSeconds = max(0, (int)$monthRaw);
+        $fileCount = 0;
+        $source = 'reported';
     }
-}
 
-// ==========================================
-// 最终返回
-// ==========================================
-api_response([
-    'status' => 'success',
-    'msg' => 'Sync completed',
-    'db_synced' => $db_updated,
-    'files_count' => isset($verified_uploads) ? count($verified_uploads) : 0
-]);
+    if (!stats_validate_values($todaySeconds, $monthSeconds)) {
+        legacy_response(['status' => 'error', 'msg' => '阅读数据校验未通过'], 400);
+    }
+
+    stats_upsert($userId, $todaySeconds, $monthSeconds);
+
+    legacy_response([
+        'status' => 'success',
+        'msg' => 'Sync completed',
+        'db_synced' => true,
+        'files_count' => $fileCount,
+        'today_seconds' => $todaySeconds,
+        'month_seconds' => $monthSeconds,
+        'source' => $source,
+    ]);
+} catch (InvalidArgumentException $e) {
+    legacy_response(['status' => 'error', 'msg' => $e->getMessage()], 400);
+} catch (RuntimeException $e) {
+    error_log('[kykky upload] ' . $e->getMessage());
+    legacy_response(['status' => 'error', 'msg' => '服务器保存失败，请稍后重试'], 500);
+}

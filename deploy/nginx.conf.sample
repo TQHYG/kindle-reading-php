@@ -1,0 +1,76 @@
+# Kykky 2.0 nginx 示例
+# 放到 /etc/nginx/conf.d/kykky.conf，并按实际路径/域名/PHP-FPM socket 修改。
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name reading.example.com;
+
+    # 指向项目根目录（静态文件 + api/）
+    root /var/www/kindle-reading-php;
+    index index.html;
+    charset utf-8;
+    client_max_body_size 32m;
+
+    access_log /var/log/nginx/kykky.access.log main;
+    error_log  /var/log/nginx/kykky.error.log notice;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    location = / {
+        try_files /index.html =404;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # 私有后端文件不可访问
+    location ~ ^/api/(lib|sql|config) {
+        deny all;
+        return 404;
+    }
+    location ~ ^/(docs|deploy)/ {
+        deny all;
+        return 404;
+    }
+
+    # 仅 api 目录下的 PHP 可执行
+    location ~ ^/api/[^/]+\.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php-fpm/www.sock;   # 按发行版修改
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+        fastcgi_read_timeout 60s;
+    }
+
+    # API 之外禁止执行 PHP
+    location ~ \.php$ {
+        return 404;
+    }
+
+    # 旧入口兼容
+    location = /index.php    { return 302 /; }
+    location = /login.php    { return 302 /login.html$is_args$args; }
+    location = /user.php     { return 302 /user.html$is_args$args; }
+    location = /rank.php     { return 302 /rank.html$is_args$args; }
+    location = /analysis.php { return 302 /analysis.html$is_args$args; }
+    location = /upload.php   { return 302 /upload.html$is_args$args; }
+    location = /device.php   { return 302 /device.html$is_args$args; }
+    location = /fastsync.php { return 302 /fastsync.html$is_args$args; }
+    location = /share.php    { return 302 /share.html$is_args$args; }
+    location = /callback.php { return 302 /api/github.php?action=callback&$args; }
+    location = /style.css    { return 302 /assets/css/app.css; }
+    location = /favicon.ico  { access_log off; return 204; }
+
+    location ~ /\.(?!well-known) {
+        deny all;
+        return 404;
+    }
+
+    location ~* \.(md|sql|log|ini)$ {
+        deny all;
+        return 404;
+    }
+}

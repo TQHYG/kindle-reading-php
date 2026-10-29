@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kykky Kindle - 你的 Kindle 阅读数据中心</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+<div id="site-nav"></div>
+
+<section class="hero">
+    <div class="container">
+        <h1>阅读，不再孤单。</h1>
+        <p class="lead">自动同步 Kindle 阅读记录，与同好一起发现阅读的乐趣。</p>
+        <div id="hero-actions" class="d-flex gap-3 justify-content-center flex-wrap mt-4"></div>
+    </div>
+</section>
+
+<main class="container py-4">
+    <div class="alert alert-warning border-0 shadow-sm mb-4" role="alert"
+         style="background: linear-gradient(90deg, #fff3cd 0%, #ffe8a3 100%);">
+        <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+            <div>
+                <h5 class="mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> 安装教程很重要，请先看这里</h5>
+                <p class="mb-0 text-dark">首次使用请先阅读介绍与安装步骤，按教程配置后再开始同步，能避免大多数问题。</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="https://www.tqhyg.net/post673.html" target="_blank" rel="noopener noreferrer" class="btn btn-dark">
+                    <i class="fa-solid fa-book-open me-1"></i> 博客介绍文章
+                </a>
+                <a href="https://github.com/TQHYG/kykky" target="_blank" rel="noopener noreferrer" class="btn btn-danger">
+                    <i class="fa-brands fa-github me-1"></i> GitHub 安装教程
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-bolt feature-icon mb-3"></i>
+                    <h5 class="card-title">实时数据统计</h5>
+                    <p class="card-text text-secondary">通过 Kindle 自动云备份与数据处理，无需插线即可实时同步阅读时长，并在全网排行中展示你的进度。</p>
+                    <a href="/rank.html" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-ranking-star me-1"></i> 立即查看排行榜
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-chart-pie feature-icon mb-3"></i>
+                    <h5 class="card-title">用户数据分析</h5>
+                    <p class="card-text text-secondary">想要更详细的图表？查看历史趋势与阅读分布，生成专属于你的阅读分析报告。</p>
+                    <a href="/analysis.html" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-chart-column me-1"></i> 进入数据分析
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quick-actions" class="card shadow-sm mb-4" hidden>
+        <div class="card-body">
+            <h5 class="card-title"><i class="fa-solid fa-rocket me-1"></i> 快速操作</h5>
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+                <a href="/upload.html" class="btn btn-outline-primary">
+                    <i class="fa-solid fa-cloud-arrow-up me-1"></i> 手动更新日志
+                </a>
+                <a href="/api/files.php?action=download_backup" class="btn btn-primary">
+                    <i class="fa-solid fa-file-zipper me-1"></i> 打包下载备份 (.zip)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4" style="background: transparent; border-style: dashed;">
+        <div class="card-body">
+            <h5 class="card-title">如何开始？</h5>
+            <ol class="text-secondary ps-3">
+                <li>使用 GitHub 登录并前往个人中心。</li>
+                <li>在 Kindle 上安装 Kykky 插件，扫描二维码绑定设备。</li>
+                <li>在 Kindle 插件内启动同步，或手动在此处上传 <code>log</code> 文件夹。</li>
+                <li>从此你的每一分钟阅读都将被铭记。</li>
+            </ol>
+        </div>
+    </div>
+</main>
+
+<footer class="text-center py-4 text-secondary small">
+    &copy; <span id="year"></span> Kykky Project. TQHYG.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/index.js"></script>
+</body>
+</html>

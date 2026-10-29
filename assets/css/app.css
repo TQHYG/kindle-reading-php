@@ -1,0 +1,233 @@
+/* Kykky 2.0 静态前端样式（配合 Bootstrap 5 / Font Awesome 6） */
+:root {
+    --kykky-primary: #0d6efd;
+    --kykky-ink: #1a1a1a;
+    --kykky-muted: #6c757d;
+}
+
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main { flex: 1 0 auto; }
+footer { flex-shrink: 0; }
+
+a { text-decoration: none; }
+
+/* ---------- 导航 ---------- */
+.navbar-brand { font-weight: 700; }
+.nav-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, .35);
+    background: #495057;
+}
+
+/* ---------- 首页 ---------- */
+.hero {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+    color: #fff;
+    padding: 5rem 0;
+    text-align: center;
+}
+.hero h1 { font-weight: 800; font-size: 2.6rem; }
+.hero p { font-size: 1.15rem; opacity: .82; }
+.hero-compact { padding: 3rem 0; }
+
+.feature-icon { font-size: 2.2rem; color: var(--kykky-primary); }
+
+/* ---------- 通用卡片 / 统计 ---------- */
+.stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+    border: 1px solid rgba(0, 0, 0, .03);
+}
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--kykky-primary);
+    line-height: 1.2;
+}
+.stat-label {
+    color: var(--kykky-muted);
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.highlight-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--kykky-ink);
+}
+.sub-label { color: #7f8c8d; font-size: .85rem; margin-top: 4px; }
+
+/* ---------- 排行榜 ---------- */
+.rank-item {
+    display: flex;
+    align-items: center;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.rank-item:last-child { border-bottom: none; }
+.rank-num {
+    width: 44px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--bs-secondary);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.rank-num.top-3 { color: var(--bs-warning); }
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #dee2e6;
+}
+
+/* ---------- 上传 ---------- */
+.upload-zone {
+    border: 2px dashed var(--bs-border-color);
+    border-radius: .75rem;
+    padding: 3rem 1rem;
+    text-align: center;
+    background-color: var(--bs-light);
+    transition: all .2s;
+    cursor: pointer;
+}
+.upload-zone:hover, .upload-zone.hover {
+    border-color: var(--bs-primary);
+    background-color: #e9ecef;
+}
+.upload-zone .icon-box {
+    font-size: 3rem;
+    color: var(--bs-secondary);
+    margin-bottom: 1rem;
+}
+
+/* ---------- 快捷同步 ---------- */
+.data-preview { margin: 1.5rem 0; }
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    padding: .6rem 0;
+    border-bottom: 1px solid #eee;
+}
+.data-row:last-child { border-bottom: none; }
+.data-label { color: var(--kykky-muted); }
+.data-value { font-weight: 600; }
+
+/* ---------- 分析页 ---------- */
+.analysis-panel {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+    border: 1px solid rgba(0, 0, 0, .08);
+}
+.chart-container { position: relative; height: 280px; width: 100%; }
+.calendar-scroll-area { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
+.calendar-grid-container { min-width: 500px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.calendar-day-header {
+    text-align: center;
+    font-weight: 600;
+    color: #adb5bd;
+    font-size: .8rem;
+    padding: 8px 0;
+}
+.day-cell {
+    background: #f8f9fa;
+    border: 1px solid #edf2f7;
+    border-radius: 10px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+}
+.day-cell.active { background-color: #e3f2fd; border-color: #90caf9; }
+.day-cell.goal-reached { background-color: #e8f5e9; border-color: #a5d6a7; }
+.day-num { font-size: .85rem; font-weight: 700; color: #4a5568; }
+.day-time { font-size: .8rem; color: var(--bs-primary, #0d6efd); font-weight: 600; }
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+}
+.btn-fab {
+    border-radius: 50px;
+    padding: 12px 30px;
+    box-shadow: 0 10px 20px rgba(13, 110, 253, .3);
+    font-weight: bold;
+}
+body.export-mode .fab-container { display: none !important; }
+
+/* ---------- 分享页 ---------- */
+.share-page #export-container { max-width: 900px; margin: 0 auto; }
+.nickname-trigger {
+    cursor: pointer;
+    border-bottom: 1px dashed #aaa;
+    transition: color .2s;
+}
+.nickname-trigger:hover {
+    color: var(--kykky-primary);
+    border-bottom-color: var(--kykky-primary);
+}
+.custom-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.custom-modal.active { display: flex; animation: fadeIn .2s ease-out; }
+.modal-content-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .2);
+    text-align: center;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- 登录 ---------- */
+.login-card { max-width: 420px; margin: 70px auto; }
+.github-button {
+    background-color: #24292e;
+    color: #fff;
+    border: none;
+}
+.github-button:hover { background-color: #111; color: #fff; }
+
+/* ---------- 工具 ---------- */
+.text-pre-wrap { white-space: pre-wrap; }
+.cursor-pointer { cursor: pointer; }
+[hidden] { display: none !important; }
+
+@media (max-width: 768px) {
+    .hero { padding: 3rem 1rem; }
+    .hero h1 { font-size: 1.8rem; }
+    .highlight-num { font-size: 1.6rem; }
+    .analysis-panel { padding: 16px; }
+    .chart-container { height: 350px; }
+    .rank-num { width: 34px; }
+}
