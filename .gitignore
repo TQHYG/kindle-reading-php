@@ -1,5 +1,3 @@
 .vscode
-config.php
-api/config.local.php
 storage/
 *.log

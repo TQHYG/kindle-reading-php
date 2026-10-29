@@ -6,7 +6,7 @@
     let sessionPromise = null;
 
     function fallbackSession() {
-        return { authenticated: false, dev_login: false, oauth_configured: false };
+        return { authenticated: false, oauth_configured: false };
     }
 
     function errorMessage(payload, response) {
@@ -105,12 +105,6 @@
     function loginUrl(redirect) {
         const target = redirect || (window.location.pathname + window.location.search);
         return '/api/github.php?action=login&redirect=' + encodeURIComponent(target);
-    }
-
-    async function devLogin() {
-        const payload = await request('/api/github.php?action=dev_login', { method: 'POST' });
-        clearSessionCache();
-        window.location.href = (payload.data && payload.data.redirect) || '/user.html';
     }
 
     function escapeHtml(value) {
@@ -243,7 +237,6 @@
         requireLogin: requireLogin,
         logout: logout,
         loginUrl: loginUrl,
-        devLogin: devLogin,
         escapeHtml: escapeHtml,
         formatDuration: formatDuration,
         formatMinutes: formatMinutes,

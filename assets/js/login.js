@@ -42,20 +42,5 @@
             window.location.replace(redirect);
             return;
         }
-
-        if (session.dev_login) {
-            const devButton = document.getElementById('dev-login');
-            devButton.hidden = false;
-            devButton.addEventListener('click', async function () {
-                Kykky.setBusy(devButton, true, '正在登录...');
-                try {
-                    await Kykky.devLogin();
-                } catch (e) {
-                    Kykky.setBusy(devButton, false);
-                    errorBox.hidden = false;
-                    errorBox.textContent = e.message;
-                }
-            });
-        }
     });
 })();

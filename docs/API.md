@@ -69,7 +69,7 @@
 未登录：
 
 ```json
-{"ok":true,"data":{"authenticated":false,"dev_login":false,"oauth_configured":true}}
+{"ok":true,"data":{"authenticated":false,"oauth_configured":true}}
 ```
 
 已登录：
@@ -83,7 +83,6 @@
     "csrf": "...",
     "expires_at": "2027-10-29 17:00:00",
     "stats": {"today_seconds":0,"month_seconds":0,"last_update":"..."},
-    "dev_login": false,
     "oauth_configured": true
   }
 }
@@ -102,10 +101,6 @@
 ### `GET /api/github.php?action=callback&code=...&state=...`
 
 校验 state，换取 GitHub 用户信息，创建/更新本地用户与会话，302 回前端。
-
-### `POST /api/github.php?action=dev_login`
-
-仅当 `app.dev_login=true` 且请求来自 `127.0.0.1`/`::1`。用于本地调试，生产禁用。
 
 ### `POST /api/github.php?action=logout`
 

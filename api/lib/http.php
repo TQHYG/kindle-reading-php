@@ -137,12 +137,6 @@ function safe_redirect_path(?string $path, string $default = '/user.html'): stri
     return $path;
 }
 
-function is_loopback_request(): bool
-{
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-    return $ip === '127.0.0.1' || $ip === '::1';
-}
-
 function api_exception_handler(Throwable $e): void
 {
     error_log('[kykky] ' . $e::class . ': ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());

@@ -3,7 +3,6 @@
  * 定时任务（仅 CLI）。
  *
  * php /path/to/api/cron.php
- * php /path/to/api/cron.php --force-daily --force-monthly  # 本地测试
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -13,8 +12,6 @@ if (PHP_SAPI !== 'cli') {
     exit("This script can only be run from the command line.\n");
 }
 
-$forceDaily = in_array('--force-daily', $argv, true);
-$forceMonthly = in_array('--force-monthly', $argv, true);
 $now = new DateTimeImmutable('now', new DateTimeZone((string)kykky_cfg('app.timezone', 'Asia/Shanghai')));
 
 echo '[' . $now->format('Y-m-d H:i:s') . "] Starting Cron Tasks...\n";
@@ -31,14 +28,14 @@ $sessions = db_exec(
 echo "- Expired sessions removed: {$sessions}\n";
 
 $isResetWindow = $now->format('H') === '00' && (int)$now->format('i') < 10;
-if ($forceDaily || $isResetWindow) {
+if ($isResetWindow) {
     db_query('UPDATE stats SET today_seconds = 0');
     echo "- Today seconds reset to zero.\n";
-}
 
-if ($forceMonthly || ($isResetWindow && $now->format('d') === '01')) {
-    db_query('UPDATE stats SET month_seconds = 0');
-    echo "- Monthly seconds reset to zero.\n";
+    if ($now->format('d') === '01') {
+        db_query('UPDATE stats SET month_seconds = 0');
+        echo "- Monthly seconds reset to zero.\n";
+    }
 }
 
 echo "All tasks finished.\n";

@@ -2,20 +2,17 @@
 /**
  * Kykky 服务端配置示例
  *
- * 复制到 /etc/kykky/config.php（推荐，Web 根目录之外），
- * 或复制为 api/config.local.php（仅本地开发，Nginx 必须禁止访问该文件）。
+ * 复制到 /etc/kykky/config.php（推荐，Web 根目录之外）。
  *
  * 可通过环境变量 KYKKY_CONFIG 指定配置文件路径。
  */
 return [
     'app' => [
         'name' => 'Kykky 阅读数据统计',
-        // 对外访问根地址，不要以 / 结尾。本地调试可用 http://127.0.0.1:8080
+        // 对外访问根地址，不要以 / 结尾
         'base_url' => 'https://reading.tqhyg.net',
         'timezone' => 'Asia/Shanghai',
         'debug' => false,
-        // 仅本地开发使用：允许 127.0.0.1/::1 调用 dev_login。生产环境务必为 false。
-        'dev_login' => false,
     ],
 
     'db' => [

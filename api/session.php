@@ -15,14 +15,12 @@ if ($action === 'me') {
     if ($session === null) {
         api_ok([
             'authenticated' => false,
-            'dev_login' => (bool)kykky_cfg('app.dev_login', false),
             'oauth_configured' => (string)kykky_cfg('oauth.client_id', '') !== '',
         ]);
     }
 
     $payload = session_public_payload($session);
     $payload['stats'] = stats_for_user((int)$session['user']['id']);
-    $payload['dev_login'] = (bool)kykky_cfg('app.dev_login', false);
     $payload['oauth_configured'] = (string)kykky_cfg('oauth.client_id', '') !== '';
     api_ok($payload);
 }

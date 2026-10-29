@@ -17,6 +17,7 @@ kindle-reading-php/
 │   fastsync.html, share.html          # 静态页面
 ├── assets/css/app.css
 ├── assets/js/                         # 页面脚本 + api.js 公共库
+├── assets/vendor/                     # Bootstrap / Font Awesome / Chart.js / pako / html2canvas
 ├── api/
 │   ├── bootstrap.php
 │   ├── lib/                           # 配置、DB、认证、日志解析、存储
@@ -24,7 +25,7 @@ kindle-reading-php/
 │   ├── auth.php                       # Kindle 设备授权（兼容旧版）
 │   ├── upload.php                     # Kindle/Web 上传
 │   ├── files.php                      # 日志列表/下载/备份
-│   ├── github.php                     # GitHub OAuth / 注销 / 本地测试登录
+│   ├── github.php                     # GitHub OAuth / 注销
 │   ├── session.php                    # Web 会话状态
 │   ├── devices.php                    # 设备绑定与管理
 │   ├── rank.php                       # 排行榜
@@ -35,17 +36,6 @@ kindle-reading-php/
 ├── deploy/                            # nginx / php-fpm 示例
 └── docs/                              # 迁移与 API 文档
 ```
-
-## 本机开发实例
-
-当前开发机已配置并保持运行：
-
-- Web：<http://127.0.0.1:8080/>
-- API 健康检查：<http://127.0.0.1:8080/api/health.php>
-- 服务：`nginx`、`php-fpm`、`mariadb`
-- 配置：`/etc/kykky/config.php`
-- 日志存储：`/var/lib/kykky/storage`
-- 本地测试登录：`app.dev_login=true` 时，登录页会出现“本地测试登录”，仅允许回环地址。
 
 ## 安装
 
@@ -78,12 +68,11 @@ sudo chown -R www-data:www-data /var/lib/kykky   # Fedora 用 apache
 
 重点配置：
 
-- `app.base_url`：对外地址，如 `https://reading.example.com` 或本地 `http://127.0.0.1:8080`
+- `app.base_url`：对外地址，如 `https://reading.example.com`
 - `db`：数据库连接
 - `oauth.redirect_uri`：必须与 GitHub OAuth App 登记的回调地址一致
 - `security.app_secret`：随机长字符串，用于设备 Token 与 OAuth state 签名
 - `storage.path`：日志保存目录，建议在 Web 根目录之外
-- `app.dev_login`：生产环境必须为 `false`
 
 ### 4. nginx
 
@@ -96,7 +85,7 @@ sudo chown -R www-data:www-data /var/lib/kykky   # Fedora 用 apache
 - 传入 `HTTP_AUTHORIZATION`，Kindle 的 Bearer Token 才能生效；
 - `client_max_body_size` 至少 32m。
 
-本机实际配置位于 `/etc/nginx/conf.d/kykky.conf`，监听 `8080`。
+前端依赖已全部本地化到 `assets/vendor/`，运行时不依赖公共 CDN。
 
 ### 5. 定时任务
 

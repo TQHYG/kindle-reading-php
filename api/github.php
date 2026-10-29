@@ -1,10 +1,9 @@
 <?php
 /**
- * GitHub OAuth 登录 / 回调 / 本地开发登录 / 注销。
+ * GitHub OAuth 登录 / 回调 / 注销。
  *
  * GET  /api/github.php?action=login&redirect=/user.html
  * GET  /api/github.php?action=callback&code=..&state=..
- * POST /api/github.php?action=dev_login        (仅 app.dev_login + 回环地址)
  * POST /api/github.php?action=logout           (X-CSRF-Token)
  */
 
@@ -67,34 +66,6 @@ if ($action === 'callback') {
         }
         auth_redirect($target);
     }
-}
-
-if ($action === 'dev_login') {
-    api_require_method('POST');
-    if (!(bool)kykky_cfg('app.dev_login', false) || !is_loopback_request()) {
-        api_error('forbidden', '本地开发登录未启用', 403);
-    }
-
-    $userId = db_transaction(function (PDO $pdo): int {
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE oauth_provider = 'dev' AND oauth_id = 0 LIMIT 1");
-        $stmt->execute();
-        $row = $stmt->fetch();
-        if ($row !== false) {
-            return (int)$row['id'];
-        }
-        $insert = $pdo->prepare(
-            "INSERT INTO users (oauth_id, oauth_provider, nickname, avatar)
-             VALUES (0, 'dev', '本地测试用户', '')"
-        );
-        $insert->execute();
-        $id = (int)$pdo->lastInsertId();
-        $stats = $pdo->prepare('INSERT IGNORE INTO stats (user_id) VALUES (?)');
-        $stats->execute([$id]);
-        return $id;
-    });
-
-    create_session($userId);
-    api_ok(['redirect' => '/user.html']);
 }
 
 if ($action === 'logout') {

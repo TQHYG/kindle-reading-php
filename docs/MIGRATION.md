@@ -70,7 +70,6 @@ CREATE INDEX idx_devices_pending ON devices (status, created_at);
     'base_url' => 'https://your-domain.example',
     'timezone' => 'Asia/Shanghai',
     'debug' => false,
-    'dev_login' => false,       // 生产必须 false
 ],
 'storage' => [
     'path' => '/var/lib/kykky/storage',
@@ -135,14 +134,7 @@ nginx 已保留 `/callback.php` 和 `/login.php` 到新地址/静态页的兼容
 - 快捷同步二维码仍指向 `/fastsync.php`，服务器会 302 到静态页；
 - 分享二维码仍指向 `/share.php`，服务器会 302 到静态分享页。
 
-客户端配置中的自定义域名仍通过 `etc/config.ini` 的 `share_domain` 设置。2.0 客户端额外支持：
-
-```ini
-share_domain=127.0.0.1:8080
-share_scheme=http
-```
-
-生产环境使用：
+客户端配置中的自定义域名仍通过 `etc/config.ini` 的 `share_domain` 设置。2.0 客户端额外支持显式协议：
 
 ```ini
 share_domain=reading.tqhyg.net
@@ -154,7 +146,7 @@ share_scheme=https
 - [ ] 数据库已备份
 - [ ] `sessions` 表已创建
 - [ ] `app_secret` 已设置为随机长字符串
-- [ ] `app.debug`、`app.dev_login` 已关闭
+- [ ] `app.debug` 已关闭
 - [ ] `app.base_url` 与 OAuth 回调一致
 - [ ] `storage.path` 可写且不在 Web 根目录内
 - [ ] nginx 只执行 `/api/*.php`
