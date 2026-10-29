@@ -38,7 +38,7 @@ server {
     }
 
     # 仅允许 CLI 执行的维护脚本
-    location ~ ^/api/(cron|recalculate_stats)\.php$ {
+    location ~ ^/api/cron\.php$ {
         deny all;
         return 404;
     }

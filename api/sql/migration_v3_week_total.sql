@@ -59,4 +59,4 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- 迁移完成后可执行 api/recalculate_stats.php，根据已上传日志回填周/月/总数据。
+-- 迁移完成后可执行 api/cron.php --recalc，根据已上传日志回填周/月/总数据。

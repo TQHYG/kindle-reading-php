@@ -33,8 +33,7 @@ kindle-reading-php/
 │   ├── stats.php                      # 当前用户统计
 │   ├── fastsync.php                   # 扫码快捷同步
 │   ├── health.php                     # 健康检查
-│   ├── cron.php                       # CLI 定时任务（清理/清零）
-│   └── recalculate_stats.php          # 每日按日志重算周/月/总计
+│   └── cron.php                       # CLI 定时任务（清理/清零/每日统计重算）
 ├── deploy/                            # nginx / php-fpm 示例
 └── docs/                              # 迁移与 API 文档
 ```
@@ -108,12 +107,25 @@ server_name_in_redirect off;
 
 ```cron
 * * * * * php /path/to/kindle-reading-php/api/cron.php >> /var/log/kykky-cron.log 2>&1
-30 0 * * * php /path/to/kindle-reading-php/api/recalculate_stats.php >> /var/log/kykky-recalculate.log 2>&1
 ```
 
-- `cron.php`：清理过期待绑定设备、清理过期会话、每日/每月清零排行榜统计。
-- `recalculate_stats.php`：每天凌晨根据用户已上传的日志重算今日/本周/本月/总计，回填旧客户端缺失的周/总数据。
-- 如需只重算单个用户：`php api/recalculate_stats.php --user=123`。
+`cron.php` 每分钟执行，内容包括：
+
+- 清理过期待绑定设备、过期会话；
+- 每日/每月清零排行榜统计；
+- 每天 00:20 - 04:59 之间自动根据已上传日志重算今日/本周/本月/总计，并用完成标记保证一天只跑一次。
+
+手动立即全量重算：
+
+```bash
+php api/cron.php --recalc
+```
+
+只重算单个用户：
+
+```bash
+php api/cron.php --user=123
+```
 
 ## Web 登录与会话
 

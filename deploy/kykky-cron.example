@@ -1,6 +1,6 @@
 # /etc/cron.d/kykky
-# 每分钟：清理 pending 设备/过期会话，并在 00:00-00:10 清零日/月统计
+# 每分钟执行：
+#   - 清理 pending 设备、过期会话
+#   - 00:00-00:10 清零日/月统计
+#   - 00:20-04:59 自动执行一次日志重算（完成标记防止重复）
 * * * * * www-data php /var/www/kindle-reading-php/api/cron.php >> /var/log/kykky-cron.log 2>&1
-
-# 每天凌晨：根据已上传日志重算今日/本周/本月/总计，回填旧客户端缺失的周/总数据
-30 0 * * * www-data php /var/www/kindle-reading-php/api/recalculate_stats.php >> /var/log/kykky-recalculate.log 2>&1
